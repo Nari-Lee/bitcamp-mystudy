@@ -1,3 +1,3 @@
 # bitcamp-mystudy
 
-okok
+brew install node@22
