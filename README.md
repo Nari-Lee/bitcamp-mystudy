@@ -1,3 +1,4 @@
 # bitcamp-mystudy
 
-brew install node@22
+brew install node@20
+brew install gradlex
