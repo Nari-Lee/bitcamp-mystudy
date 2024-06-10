@@ -1,5 +1,6 @@
 package bitcamp.myapp;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class App {
@@ -13,53 +14,40 @@ public class App {
 
         String line = "----------------------------------------";
         String title = "[팀 프로젝트 관리 시스템";
-        String user = "1. 회원";
-        String team = "2. 팀";
-        String project = "3. 프로젝트";
-        String board = "4. 게시판";
-        String help = "5. 도움말";
-        String end = "6. 종료";
+
+        String[] menus = {"회원", "팀", "프로젝트", "게시판", "도움말", "종료"};
 
         System.out.println(boldAnsi + line + resetAnsi);
         System.out.println(boldAnsi + title + resetAnsi + "\n");
-        System.out.println(user);
-        System.out.println(team);
-        System.out.println(project);
-        System.out.println(board);
-        System.out.println(help);
-        System.out.println(boldAnsi + redAnsi + end + resetAnsi);
+
+        for (int i = 0; i < menus.length; i++) {
+            if (i == 5) {
+                System.out.printf("%s%d. %s%s\n", (boldAnsi + redAnsi), (i + 1), menus[5], resetAnsi);
+            } else {
+                System.out.printf("%d. %s\n", (i + 1), menus[i]);
+            }
+        }
+
         System.out.println(boldAnsi + line + resetAnsi);
 
-        String input;
-        do {
-        System.out.print("> ");
-        input = scanner.nextLine();
+        while (true) {
+            System.out.print("> ");
+            try {
+            int menuNo = scanner.nextInt();
 
-        switch (input) {
-            case "1":
-                System.out.println("회원");
-                break;
-            case "2":
-                System.out.println("팀");
-                break;
-            case "3":
-                System.out.println("프로젝트");
-                break;
-            case "4":
-                System.out.println("게시판");
-                break;
-            case "5":
-                System.out.println("도움말");
-                break;
-            case "6":
-                System.out.println("종료");
-                break;
-            default:
-                System.out.println("메뉴 번호가 옳지 않습니다.");
-                break;
+            if (menuNo >= 1 && menuNo <= menus.length) {
+                if (menus[menuNo -1] == "종료") {
+                    break;
+                }
+                    System.out.println(menus[menuNo - 1]);
+                } else {
+                System.out.println("유효한 메뉴 번호가 아닙니다.");
+            }
+            } catch (InputMismatchException e) {
+                System.out.println("숫자로 메뉴 번호를 입력하세요.");
+                scanner.next();
+            }
         }
-        } while (!input.equals("6"));
-
         scanner.close();
     }
 }
