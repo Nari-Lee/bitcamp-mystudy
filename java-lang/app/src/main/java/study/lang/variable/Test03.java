@@ -19,7 +19,7 @@ public class Test03 {
 
     int[][] arr2 = new int[3][4];
     // int[][] arr2 = new int[3][];
-    // int[0]
+    // int[0] arr2 = new int[3]
 
 
 

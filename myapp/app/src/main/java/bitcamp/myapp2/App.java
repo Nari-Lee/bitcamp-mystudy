@@ -1,14 +1,19 @@
-package bitcamp.myapp;
+package bitcamp.myapp2;
 
 import java.util.Scanner;
 
 public class App {
 
+  static final int MAX_SIZE = 100;
   static Scanner keyboardScanner = new Scanner(System.in);
-
   static String[] mainMenus = new String[] {"회원", "팀", "프로젝트", "게시판", "도움말", "종료"};
   static String[][] subMenus = {{"등록", "목록", "조회", "변경", "삭제"}, {"등록", "목록", "조회", "변경", "삭제"},
       {"등록", "목록", "조회", "변경", "삭제"}, {"등록", "목록", "조회", "변경", "삭제"}};
+  static String[] name = new String[MAX_SIZE];
+  static String[] email = new String[MAX_SIZE];
+  static String[] password = new String[MAX_SIZE];
+  static String[] tel = new String[MAX_SIZE];
+  static int memberLength = 0;
 
   public static void main(String[] args) {
 
@@ -17,7 +22,7 @@ public class App {
     String command;
     while (true) {
       try {
-        command = prompt("메인");
+        command = prompt("메인>");
 
         if (command.equals("menu")) {
           printMenu();
@@ -78,7 +83,7 @@ public class App {
   }
 
   static String prompt(String title) {
-    System.out.printf("%s> ", title);
+    System.out.printf("%s ", title);
     return keyboardScanner.nextLine();
   }
 
@@ -93,7 +98,7 @@ public class App {
   static void processMenu(String menuTitle, String[] menus) {
     printSubMenu(menuTitle, menus);
     while (true) {
-      String command = prompt("메인/" + menuTitle);
+      String command = prompt("메인/" + menuTitle + "> ");
       if (command.equals("menu")) {
         printSubMenu(menuTitle, menus);
         continue;
@@ -107,11 +112,62 @@ public class App {
         if (subMenuTitle == null) {
           System.out.println("유효한 메뉴 번호가 아닙니다.");
         } else {
-          System.out.println(subMenuTitle);
+          switch (menuTitle) {
+            case "회원":
+              executeCommand(subMenuTitle);
+              break;
+            case "팀":
+              executeCommand(subMenuTitle);
+              break;
+            case "프로젝트":
+              executeCommand(subMenuTitle);
+              break;
+            case "게시판":
+              executeCommand(subMenuTitle);
+              break;
+            default:
+              System.out.printf("%s 메뉴의 명령을 처리할 수 없습니다.\n", menuTitle);
+          }
+
         }
       } catch (NumberFormatException ex) {
         System.out.println("숫자로 메뉴 번호를 입력하세요.");
       }
+    }
+  }
+
+  static void executeCommand(String command) {
+    System.out.printf("[%s]", command);
+
+    switch (command) {
+      case "등록":
+        name[memberLength] = prompt("이름?");
+        email[memberLength] = prompt("이메일?");
+        password[memberLength] = prompt("암호?");
+        tel[memberLength] = prompt("연락처?");
+        memberLength++;
+        break;
+      case "목록":
+        System.out.println("번호 이름 이메일");
+        for (int i = 0; i < memberLength; i++) {
+          System.out.printf("%d %s %s", (i + 1), name[i], email[i]);
+        }
+        break;
+      case "조회":
+        int userNo = Integer.parseInt(prompt("회원번호?"));
+
+        if (userNo < 1 || userNo > memberLength) {
+          System.out.println("없는 회원 입니다.");
+          return;
+        }
+        System.out.printf("이름: %s\n", name[memberLength - 1]);
+        System.out.printf("이메일: %s\n", email[memberLength - 1]);
+        System.out.printf("연락처: %s\n", tel[memberLength - 1]);
+        break;
+      case "변경":
+        break;
+      case "삭제":
+        break;
     }
   }
 }
