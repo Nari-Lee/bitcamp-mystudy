@@ -1,8 +1,7 @@
 package study.oop.clazz.vo;
 
 public class Score {
-
-  public String name;
+  private String name;
   private int kor;
   private int eng;
   private int math;
@@ -59,12 +58,11 @@ public class Score {
   }
 
   public int getSum() {
-    return sum;
+    return this.sum;
   }
 
   public float getAver() {
-    return aver;
+    return this.aver;
   }
-
 
 }
