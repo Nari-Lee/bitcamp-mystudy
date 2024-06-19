@@ -1,11 +1,13 @@
 package bitcamp.myapp.vo;
 
+import java.util.Date;
+
 public class Board {
 
   private String headline;
   private String contents;
   private int viewCount;
-  private String writeDate;
+  private Date writeDate;
 
   public String getHeadline() {
     return headline;
@@ -35,11 +37,11 @@ public class Board {
     this.viewCount++;
   }
 
-  public String getWriteDate() {
+  public Date getWriteDate() {
     return writeDate;
   }
 
-  public void setWriteDate(String writeDate) {
+  public void setWriteDate(Date writeDate) {
     this.writeDate = writeDate;
   }
 }

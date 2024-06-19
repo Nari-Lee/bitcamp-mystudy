@@ -5,7 +5,6 @@ import java.util.Scanner;
 public class Prompt {
 
   static Scanner keyboardScanner = new Scanner(System.in);
-  private static String lastInputDate;
 
   public static String input(String format, Object... args) {
     System.out.printf(format + " ", args);

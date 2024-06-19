@@ -3,6 +3,8 @@ package bitcamp.myapp.command;
 import bitcamp.myapp.util.Prompt;
 import bitcamp.myapp.vo.Board;
 
+import java.util.Date;
+
 public class BoardCommand {
 
   private static final int MAX_SIZE = 100;
@@ -39,7 +41,7 @@ public class BoardCommand {
     Board board = new Board();
     board.setHeadline(Prompt.input("제목?"));
     board.setContents(Prompt.input("내용?"));
-    board.setWriteDate(Prompt.input("작성일?"));
+    board.setWriteDate((new Date()));
     boards[boardLength++] = board;
   }
 
@@ -47,8 +49,8 @@ public class BoardCommand {
     System.out.println("번호 제목 작성일 조회수");
     for (int i = 0; i < boardLength; i++) {
       Board board = boards[i];
-      System.out.printf("%d %s %s %d\n", (i + 1), board.getHeadline(), board.getWriteDate(),
-          board.getViewCount());
+      System.out.printf("%d %s %tY-%3$tm-%3$td %d\n", (i + 1), board.getHeadline(),
+          board.getWriteDate(), board.getViewCount());
     }
   }
 
@@ -63,8 +65,9 @@ public class BoardCommand {
 
     System.out.printf("제목: %s\n", board.getHeadline());
     System.out.printf("내용: %s\n", board.getContents());
-    System.out.printf("작성일: %s\n", board.getWriteDate());
+    System.out.printf("작성일: %1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS\n", board.getWriteDate());
     System.out.printf("조회수: %d\n", board.getViewCount());
+    ;
   }
 
   private static void updateBoard() {
@@ -74,6 +77,7 @@ public class BoardCommand {
       return;
     }
     Board board = boards[boardNo - 1];
+    board.incrementViewCount();
     board.setHeadline(Prompt.input("제목(%s)?", board.getHeadline()));
     board.setContents(Prompt.input("내용(%s)?", board.getContents()));
     System.out.println("변경 했습니다.");
