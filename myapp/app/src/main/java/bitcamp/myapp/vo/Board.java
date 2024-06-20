@@ -4,25 +4,48 @@ import java.util.Date;
 
 public class Board {
 
-  private String headline;
-  private String contents;
+  private static int seqNo;
+
+  private int no;
+  private String title;
+  private String content;
+  private Date createdDate;
   private int viewCount;
-  private Date writeDate;
 
-  public String getHeadline() {
-    return headline;
+  public static int getNextSeqNo() {
+    return ++seqNo;
   }
 
-  public void setHeadline(String headline) {
-    this.headline = headline;
+  public int getNo() {
+    return no;
   }
 
-  public String getContents() {
-    return contents;
+  public void setNo(int no) {
+    this.no = no;
   }
 
-  public void setContents(String contents) {
-    this.contents = contents;
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public String getContent() {
+    return content;
+  }
+
+  public void setContent(String content) {
+    this.content = content;
+  }
+
+  public Date getCreatedDate() {
+    return createdDate;
+  }
+
+  public void setCreatedDate(Date createdDate) {
+    this.createdDate = createdDate;
   }
 
   public int getViewCount() {
@@ -31,17 +54,5 @@ public class Board {
 
   public void setViewCount(int viewCount) {
     this.viewCount = viewCount;
-  }
-
-  public void incrementViewCount() {
-    this.viewCount++;
-  }
-
-  public Date getWriteDate() {
-    return writeDate;
-  }
-
-  public void setWriteDate(Date writeDate) {
-    this.writeDate = writeDate;
   }
 }
