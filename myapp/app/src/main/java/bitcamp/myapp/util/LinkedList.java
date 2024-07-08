@@ -23,6 +23,7 @@ public class LinkedList extends AbstractList {
     if (index < 0 || index >= size) {
       return null;
     }
+
     Node cursor = first;
     int currentIndex = 0;
 
@@ -56,6 +57,7 @@ public class LinkedList extends AbstractList {
 
     Node cursor = first;
     int currentIndex = 0;
+
     while (cursor != null) {
       if (currentIndex == (index - 1)) {
         break;
@@ -67,7 +69,7 @@ public class LinkedList extends AbstractList {
     deletedNode = cursor.next;
     cursor.next = cursor.next.next;
 
-    if (cursor.next == last) {
+    if (cursor.next == null) {
       last = cursor;
     }
 
@@ -94,31 +96,16 @@ public class LinkedList extends AbstractList {
     Object[] arr = new Object[size];
 
     Node cursor = first;
-    int currentIndex = 0;
-
     for (int i = 0; i < size; i++) {
       arr[i] = cursor.value;
       cursor = cursor.next;
     }
+
     return arr;
   }
 
-  public void printAll() {
-    Node cursor = first;
-    while (cursor != null) {
-      System.out.print(cursor.value + ",");
-      cursor = cursor.next;
-    }
-    System.out.println();
-  }
-
-  // 1) 스태틱 중첩 클래스
-  private static class Node {
-    Object value;
-    Node next;
-
-    public Node(Object value) {
-      this.value = value;
-    }
+  @Override
+  public int size() {
+    return size;
   }
 }

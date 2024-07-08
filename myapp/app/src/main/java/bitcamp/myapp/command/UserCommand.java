@@ -4,28 +4,39 @@ import bitcamp.myapp.util.LinkedList;
 import bitcamp.myapp.util.Prompt;
 import bitcamp.myapp.vo.User;
 
-public class UserCommand {
+public class UserCommand extends AbstractCommand {
+
 
   LinkedList userList = new LinkedList();
+  String[] menus = {"등록", "목록", "조회", "변경", "삭제"};
 
-  public void executeUserCommand(String command) {
-    System.out.printf("[%s]\n", command);
+  public UserCommand(String menuTitle) {
+    super(menuTitle);
+  }
 
-    switch (command) {
+  @Override
+  protected String[] getMenus() {
+    return menus;
+  }
+
+  @Override
+  protected void processMenu(String menuName) {
+    System.out.printf("[%s]\n", menuName);
+    switch (menuName) {
       case "등록":
-        addUser();
+        this.addUser();
         break;
       case "조회":
-        viewUser();
+        this.viewUser();
         break;
       case "목록":
-        listUser();
+        this.listUser();
         break;
       case "변경":
-        updateUser();
+        this.updateUser();
         break;
       case "삭제":
-        deleteUser();
+        this.deleteUser();
         break;
     }
   }
@@ -55,6 +66,7 @@ public class UserCommand {
       System.out.println("없는 회원입니다.");
       return;
     }
+
     System.out.printf("이름: %s\n", user.getName());
     System.out.printf("이메일: %s\n", user.getEmail());
     System.out.printf("연락처: %s\n", user.getTel());
