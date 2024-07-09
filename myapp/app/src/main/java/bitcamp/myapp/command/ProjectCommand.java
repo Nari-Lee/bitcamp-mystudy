@@ -1,19 +1,19 @@
 package bitcamp.myapp.command;
 
-import bitcamp.myapp.util.LinkedList;
+import bitcamp.myapp.util.List;
 import bitcamp.myapp.util.Prompt;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
 
 public class ProjectCommand extends AbstractCommand {
 
+  private String[] menus = {"등록", "목록", "조회", "변경", "삭제"};
+  private List userList;
+  private List projectList;
 
-  LinkedList projectList = new LinkedList();
-  LinkedList userList;
-  String[] menus = {"등록", "목록", "조회", "변경", "삭제"};
-
-  public ProjectCommand(String menuTitle, LinkedList userList) {
+  public ProjectCommand(String menuTitle, List list, List userList) {
     super(menuTitle);
+    this.projectList = list;
     this.userList = userList;
   }
 
@@ -24,6 +24,7 @@ public class ProjectCommand extends AbstractCommand {
 
   @Override
   protected void processMenu(String menuName) {
+
     System.out.printf("[%s]\n", menuName);
     switch (menuName) {
       case "등록":
