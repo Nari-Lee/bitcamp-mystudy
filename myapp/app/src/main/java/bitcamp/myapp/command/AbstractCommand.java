@@ -1,7 +1,6 @@
 package bitcamp.myapp.command;
 
 import bitcamp.myapp.util.Prompt;
-
 import java.util.Stack;
 
 public abstract class AbstractCommand implements Command {
@@ -13,7 +12,7 @@ public abstract class AbstractCommand implements Command {
   }
 
   @Override
-  public void execute(Stack menuPath) {
+  public void execute(Stack<String> menuPath) {
     menuPath.push(menuTitle);
 
     printMenus();
