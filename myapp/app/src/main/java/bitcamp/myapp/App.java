@@ -1,31 +1,64 @@
 package bitcamp.myapp;
 
-import bitcamp.myapp.command.*;
+import bitcamp.menu.MenuGroup;
+import bitcamp.menu.MenuItem;
+import bitcamp.myapp.command.HelpCommand;
+import bitcamp.myapp.command.HistoryCommand;
+import bitcamp.myapp.command.board.*;
+import bitcamp.myapp.command.project.*;
+import bitcamp.myapp.command.user.*;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
 import bitcamp.util.Prompt;
 
-import java.util.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class App {
 
 
-  String[] menus = {"회원", "프로젝트", "게시판", "도움말", "명령내역", "종료"};
-  Stack menuPath = new Stack();
+  MenuGroup mainMenu = new MenuGroup("메인");
 
-  Map<String, Command> commandMap = new HashMap<>();
+  List<User> userList = new ArrayList<>();
+  List<Project> projectList = new LinkedList<>();
+  List<Board> boardList = new LinkedList<>();
 
   public App() {
-    List<User> userList = new ArrayList<>();
-    List<Project> projectList = new LinkedList<>();
-    List<Board> boardList = new LinkedList<>();
 
-    commandMap.put("회원", new UserCommand("회원", userList));
-    commandMap.put("게시판", new BoardCommand("게시판", boardList));
-    commandMap.put("프로젝트", new ProjectCommand("프로젝트", projectList, userList));
-    commandMap.put("도움말", new HelpCommand());
-    commandMap.put("명령내역", new HistoryCommand());
+    MenuGroup userMenu = new MenuGroup("회원");
+    userMenu.add(new MenuItem("등록", new UserAddCommand(userList)));
+    userMenu.add(new MenuItem("목록", new UserListCommand(userList)));
+    userMenu.add(new MenuItem("조회", new UserViewCommand(userList)));
+    userMenu.add(new MenuItem("변경", new UserUpdateCommand(userList)));
+    userMenu.add(new MenuItem("삭제", new UserDeleteCommand(userList)));
+    mainMenu.add(userMenu);
+
+    MenuGroup projectMenu = new MenuGroup("프로젝트");
+    ProjectMemberHandler memberHandler = new ProjectMemberHandler(userList);
+    projectMenu.add(new MenuItem("등록", new ProjectAddCommand(projectList, memberHandler)));
+    projectMenu.add(new MenuItem("목록", new ProjectListCommand(projectList)));
+    projectMenu.add(new MenuItem("조회", new ProjectViewCommand(projectList)));
+    projectMenu.add(new MenuItem("변경", new ProjectUpdateCommand(projectList, memberHandler)));
+    projectMenu.add(new MenuItem("삭제", new ProjectDeleteCommand(projectList)));
+    mainMenu.add(projectMenu);
+
+    MenuGroup boardMenu = new MenuGroup("게시판");
+    boardMenu.add(new MenuItem("등록", new BoardAddCommand(boardList)));
+    boardMenu.add(new MenuItem("목록", new BoardListCommand(boardList)));
+    boardMenu.add(new MenuItem("조회", new BoardViewCommand(boardList)));
+    boardMenu.add(new MenuItem("변경", new BoardUpdateCommand(boardList)));
+    boardMenu.add(new MenuItem("삭제", new BoardDeleteCommand(boardList)));
+    mainMenu.add(boardMenu);
+
+    mainMenu.add(new MenuItem("도움말", new HelpCommand()));
+    mainMenu.add(new MenuItem("명령내역", new HistoryCommand()));
+
+    mainMenu.setExitMenuTitle("종료");
   }
 
 
@@ -34,32 +67,16 @@ public class App {
   }
 
   void execute() {
-    menuPath.push("메인");
+    String appTitle = "[프로젝트 관리 시스템]";
+    String line = "----------------------------------";
 
-    printMenu();
-
-    String command;
-    while (true) {
-      try {
-        command = Prompt.input("%s>", getMenuPathTitle(menuPath));
-
-        if (command.equals("menu")) {
-          printMenu();
-
-        } else {
-          int menuNo = Integer.parseInt(command);
-          String menuTitle = getMenuTitle(menuNo); // 설명하는 변수
-          if (menuTitle == null) {
-            System.out.println("유효한 메뉴 번호가 아닙니다.");
-          } else if (menuTitle.equals("종료")) {
-            break;
-          } else {
-            processMenu(menuTitle);
-          }
-        }
-      } catch (NumberFormatException ex) {
-        System.out.println("숫자로 메뉴 번호를 입력하세요.");
-      }
+    try {
+      loadData();
+      mainMenu.execute();
+    } catch (Exception ex) {
+      System.out.println("실행 오류!");
+    } finally {
+      saveData();
     }
 
     System.out.println("종료합니다.");
@@ -67,53 +84,149 @@ public class App {
     Prompt.close();
   }
 
-  void printMenu() {
-    String boldAnsi = "\033[1m";
-    String redAnsi = "\033[31m";
-    String resetAnsi = "\033[0m";
+  private void loadData() {
+    loadUsers();
+    loadProjects();
+    loadBoards();
+    System.out.println("데이터를 로딩 했습니다.");
+  }
 
-    String appTitle = "[프로젝트 관리 시스템]";
-    String line = "----------------------------------";
+  private void loadUsers() {
+    try (FileInputStream in = new FileInputStream("user.data")) {
 
-    System.out.println(boldAnsi + line + resetAnsi);
-    System.out.println(boldAnsi + appTitle + resetAnsi);
+      // User 데이터 개수: 파일에서 2바이트를 읽는다.
+      int userLength = (in.read() << 8) | in.read();
 
-    for (int i = 0; i < menus.length; i++) {
-      if (menus[i].equals("종료")) {
-        System.out.printf("%s%d. %s%s\n", (boldAnsi + redAnsi), (i + 1), menus[i], resetAnsi);
-      } else {
-        System.out.printf("%d. %s\n", (i + 1), menus[i]);
+      int maxUserNo = 0;
+      for (int i = 0; i < userLength; i++) {
+        // 한 개의 User 데이터 바이트 배열 크기: 파일에서 2바이트를 읽는다.
+        int len = (in.read() << 8) | in.read();
+
+        // 한 개의 User 데이터 바이트 배열: 위에서 지정한 개 수 만큼 바이트 배열을 읽는다.
+        byte[] bytes = new byte[len];
+        in.read(bytes);
+
+        // User 바이트 배열을 가지고 User 객체를 생성
+        User user = User.valueOf(bytes);
+        userList.add(user);
+
+        if (user.getNo() > maxUserNo) {
+          maxUserNo = user.getNo();
+        }
       }
+
+      User.initSeqNo(maxUserNo);
+
+    } catch (IOException e) {
+      System.out.println("회원 정보 로딩 중 오류 발생!");
     }
-
-    System.out.println(boldAnsi + line + resetAnsi);
   }
 
-  private boolean isValidateMenu(int menuNo) {
-    return menuNo >= 1 && menuNo <= menus.length;
-  }
+  private void loadProjects() {
+    try (FileInputStream in = new FileInputStream("project.data")) {
 
-  private String getMenuTitle(int menuNo) {
-    return isValidateMenu(menuNo) ? menus[menuNo - 1] : null;
-  }
+      int projectLength = (in.read() << 8) | in.read();
+      int maxProjectNo = 0;
+      for (int i = 0; i < projectLength; i++) {
+        int len = (in.read() << 8) | in.read();
+        byte[] bytes = new byte[len];
+        in.read(bytes);
 
-  void processMenu(String menuTitle) {
-    Command command = commandMap.get(menuTitle);
-    if (command == null) {
-      System.out.printf("%s 메뉴의 명령을 처리할 수 없습니다.\n", menuTitle);
-      return;
-    }
-    command.execute(menuPath);
-  }
+        Project project = Project.valueOf(bytes);
+        projectList.add(project);
 
-  private String getMenuPathTitle(Stack menuPath) {
-    StringBuilder strBuilder = new StringBuilder();
-    for (int i = 0; i < menuPath.size(); i++) {
-      if (strBuilder.length() > 0) {
-        strBuilder.append("/");
+        if (project.getNo() > maxProjectNo) {
+          maxProjectNo = project.getNo();
+        }
       }
-      strBuilder.append(menuPath.get(i));
+
+      Project.initSeqNo(maxProjectNo);
+
+    } catch (IOException e) {
+      System.out.println("프로젝트 정보 로딩 중 오류 발생!");
     }
-    return strBuilder.toString();
+  }
+
+  private void loadBoards() {
+    try (FileInputStream in = new FileInputStream("board.data")) {
+
+      int userLength = (in.read() << 8) | in.read();
+      int maxBoardNo = 0;
+      for (int i = 0; i < userLength; i++) {
+        int len = (in.read() << 8) | in.read();
+        byte[] bytes = new byte[len];
+        in.read(bytes);
+
+        Board board = Board.valueOf(bytes);
+        boardList.add(board);
+
+        if (board.getNo() > maxBoardNo) {
+          maxBoardNo = board.getNo();
+        }
+      }
+
+      Board.initSeqNo(maxBoardNo);
+
+    } catch (IOException e) {
+      System.out.println("게시글 정보 로딩 중 오류 발생!");
+    }
+  }
+
+  private void saveData() {
+    saveUsers();
+    saveProjects();
+    saveBoards();
+    System.out.println("데이터를 저장 했습니다.");
+  }
+
+  private void saveUsers() {
+    try (FileOutputStream out = new FileOutputStream("user.data")) {
+      // 몇 개의 데이터를 읽을지 알려주기 위해 저장 데이터의 개수를 출력한다.
+      out.write(userList.size() >> 8);
+      out.write(userList.size());
+
+      for (User user : userList) {
+        byte[] bytes = user.getBytes();
+        // User 데이터의 바이트 배열 크기를 출력한다.
+        // 왜? 읽을 때 한 개 분량의 User 바이트 배열을 읽기 위해
+        out.write(bytes.length >> 8);
+        out.write(bytes.length);
+        out.write(bytes);
+      }
+    } catch (IOException e) {
+      System.out.println("회원 정보 저장 중 오류 발생!");
+    }
+  }
+
+  private void saveProjects() {
+    try (FileOutputStream out = new FileOutputStream("project.data")) {
+      out.write(projectList.size() >> 8);
+      out.write(projectList.size());
+
+      for (Project project : projectList) {
+        byte[] bytes = project.getBytes();
+        out.write(bytes.length >> 8);
+        out.write(bytes.length);
+        out.write(bytes);
+      }
+    } catch (IOException e) {
+      System.out.println("프로젝트 정보 저장 중 오류 발생!");
+    }
+  }
+
+  private void saveBoards() {
+    try (FileOutputStream out = new FileOutputStream("board.data")) {
+      out.write(boardList.size() >> 8);
+      out.write(boardList.size());
+
+      for (Board board : boardList) {
+        byte[] bytes = board.getBytes();
+        out.write(bytes.length >> 8);
+        out.write(bytes.length);
+        out.write(bytes);
+      }
+    } catch (IOException e) {
+      System.out.println("게시글 정보 저장 중 오류 발생!");
+    }
   }
 }

@@ -1,4 +1,8 @@
 package bitcamp.menu;
 
-public class Menu {
+public interface Menu {
+
+  String getTitle();
+
+  void execute();
 }

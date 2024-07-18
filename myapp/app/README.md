@@ -1,12 +1,13 @@
-# 25. 자바 Collection API 사용하기
+# 28. File I/O API 활용하기 I :  데이터를 바이너리 형식으로 입출력
 
 ## 학습목표
 
-- 자바에서 제공하는 컬렉션 API를 사용할 수 있다.
+- File I/O API를 사용하여 데이터를 바이너리 형식으로 출력할 수 있다.
 
 ## 요구사항
 
-- 기존에 작성한 컬렉션 클래스 대신 자바에서 제공하는 클래스로 교체하기
+- 회원, 프로젝트, 게시판 데이터를 앱을 종료할 때 파일로 저장한다.
+- 회원, 프로젝트, 게시판 데이터를 앱을 실행할 때 파일에서 읽는다.
 
 ## 실행 결과
 
@@ -14,15 +15,11 @@
 
 ## 작업
 
-- 목록 관련 클래스 삭제
+- 데이터를 저장
+  - App 클래스 변경
+    - loadData() 메서드 추가
 
 ## 소스 파일
 
-- List.java (삭제)
-- Iterator.java (삭제)
-- AbstractList.java (삭제)
-- ArrayList.java (삭제)
-- LinkedList.java (삭제)
-- Stack.java (삭제)
-- Queue.java (삭제)
-- Board.java, User.java 빼고 모두 변경
+
+- App.java
