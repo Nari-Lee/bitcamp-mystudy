@@ -12,12 +12,11 @@ import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
 import bitcamp.util.Prompt;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 
 public class App {
 
@@ -29,6 +28,8 @@ public class App {
   List<Board> boardList = new LinkedList<>();
 
   public App() {
+
+    loadData();
 
     MenuGroup userMenu = new MenuGroup("회원");
     userMenu.add(new MenuItem("등록", new UserAddCommand(userList)));
@@ -71,10 +72,12 @@ public class App {
     String line = "----------------------------------";
 
     try {
-      loadData();
       mainMenu.execute();
+
     } catch (Exception ex) {
       System.out.println("실행 오류!");
+      ex.printStackTrace();
+
     } finally {
       saveData();
     }
@@ -92,24 +95,18 @@ public class App {
   }
 
   private void loadUsers() {
-    try (FileInputStream in = new FileInputStream("user.data")) {
-
-      // User 데이터 개수: 파일에서 2바이트를 읽는다.
-      int userLength = (in.read() << 8) | in.read();
+    try (Scanner in = new Scanner(new FileReader("user.csv"))) {
+      while (true) {
+        try {
+          String csv = in.nextLine();
+          userList.add(User.valueOf(csv));
+        } catch (Exception e) {
+          break;
+        }
+      }
 
       int maxUserNo = 0;
-      for (int i = 0; i < userLength; i++) {
-        // 한 개의 User 데이터 바이트 배열 크기: 파일에서 2바이트를 읽는다.
-        int len = (in.read() << 8) | in.read();
-
-        // 한 개의 User 데이터 바이트 배열: 위에서 지정한 개 수 만큼 바이트 배열을 읽는다.
-        byte[] bytes = new byte[len];
-        in.read(bytes);
-
-        // User 바이트 배열을 가지고 User 객체를 생성
-        User user = User.valueOf(bytes);
-        userList.add(user);
-
+      for (User user : userList) {
         if (user.getNo() > maxUserNo) {
           maxUserNo = user.getNo();
         }
@@ -119,22 +116,17 @@ public class App {
 
     } catch (IOException e) {
       System.out.println("회원 정보 로딩 중 오류 발생!");
+      // e.printStackTrace();
     }
   }
 
   private void loadProjects() {
-    try (FileInputStream in = new FileInputStream("project.data")) {
+    try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("project.data"))) {
 
-      int projectLength = (in.read() << 8) | in.read();
+      projectList = (List<Project>) in.readObject();
+
       int maxProjectNo = 0;
-      for (int i = 0; i < projectLength; i++) {
-        int len = (in.read() << 8) | in.read();
-        byte[] bytes = new byte[len];
-        in.read(bytes);
-
-        Project project = Project.valueOf(bytes);
-        projectList.add(project);
-
+      for (Project project : projectList) {
         if (project.getNo() > maxProjectNo) {
           maxProjectNo = project.getNo();
         }
@@ -142,24 +134,26 @@ public class App {
 
       Project.initSeqNo(maxProjectNo);
 
-    } catch (IOException e) {
+    } catch (IOException | ClassNotFoundException e) {
       System.out.println("프로젝트 정보 로딩 중 오류 발생!");
+      // e.printStackTrace();
+      projectList = new LinkedList<>();
     }
   }
 
   private void loadBoards() {
-    try (FileInputStream in = new FileInputStream("board.data")) {
+    try (Scanner in = new Scanner(new FileReader("board.csv"))) {
+      while (true) {
+        try {
+          String csv = in.nextLine();
+          boardList.add(Board.valueOf(csv));
+        } catch (Exception e) {
+          break;
+        }
+      }
 
-      int userLength = (in.read() << 8) | in.read();
       int maxBoardNo = 0;
-      for (int i = 0; i < userLength; i++) {
-        int len = (in.read() << 8) | in.read();
-        byte[] bytes = new byte[len];
-        in.read(bytes);
-
-        Board board = Board.valueOf(bytes);
-        boardList.add(board);
-
+      for (Board board : boardList) {
         if (board.getNo() > maxBoardNo) {
           maxBoardNo = board.getNo();
         }
@@ -169,6 +163,7 @@ public class App {
 
     } catch (IOException e) {
       System.out.println("게시글 정보 로딩 중 오류 발생!");
+      // e.printStackTrace();
     }
   }
 
@@ -180,53 +175,39 @@ public class App {
   }
 
   private void saveUsers() {
-    try (FileOutputStream out = new FileOutputStream("user.data")) {
-      // 몇 개의 데이터를 읽을지 알려주기 위해 저장 데이터의 개수를 출력한다.
-      out.write(userList.size() >> 8);
-      out.write(userList.size());
+    try (FileWriter out = new FileWriter("user.csv")) {
 
       for (User user : userList) {
-        byte[] bytes = user.getBytes();
-        // User 데이터의 바이트 배열 크기를 출력한다.
-        // 왜? 읽을 때 한 개 분량의 User 바이트 배열을 읽기 위해
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
+        out.write(user.toCsvString() + "\n");
       }
+
     } catch (IOException e) {
       System.out.println("회원 정보 저장 중 오류 발생!");
+      e.printStackTrace();
     }
   }
 
   private void saveProjects() {
-    try (FileOutputStream out = new FileOutputStream("project.data")) {
-      out.write(projectList.size() >> 8);
-      out.write(projectList.size());
+    try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("project.data"))) {
 
-      for (Project project : projectList) {
-        byte[] bytes = project.getBytes();
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
-      }
+      out.writeObject(projectList);
+
     } catch (IOException e) {
       System.out.println("프로젝트 정보 저장 중 오류 발생!");
+      e.printStackTrace();
     }
   }
 
   private void saveBoards() {
-    try (FileOutputStream out = new FileOutputStream("board.data")) {
-      out.write(boardList.size() >> 8);
-      out.write(boardList.size());
+    try (FileWriter out = new FileWriter("board.csv")) {
 
       for (Board board : boardList) {
-        byte[] bytes = board.getBytes();
-        out.write(bytes.length >> 8);
-        out.write(bytes.length);
-        out.write(bytes);
+        out.write(board.toCsvString() + "\n");
       }
+
     } catch (IOException e) {
       System.out.println("게시글 정보 저장 중 오류 발생!");
+      e.printStackTrace();
     }
   }
 }
