@@ -9,14 +9,20 @@ import bitcamp.myapp.command.project.*;
 import bitcamp.myapp.command.user.*;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.Project;
+import bitcamp.myapp.vo.SequenceNo;
 import bitcamp.myapp.vo.User;
 import bitcamp.util.Prompt;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 
 public class App {
 
@@ -88,126 +94,89 @@ public class App {
   }
 
   private void loadData() {
-    loadUsers();
-    loadProjects();
-    loadBoards();
+    loadJson(userList, "user.json", User.class);
+    loadJson(projectList, "project.json", Project.class);
+    loadJson(boardList, "board.json", Board.class);
+
     System.out.println("데이터를 로딩 했습니다.");
   }
 
-  private void loadUsers() {
-    try (Scanner in = new Scanner(new FileReader("user.csv"))) {
-      while (true) {
-        try {
-          String csv = in.nextLine();
-          userList.add(User.valueOf(csv));
-        } catch (Exception e) {
+  private <E> void initSeqNo(List<E> list, Class<E> elementType) throws Exception {
+    int maxSeqNo = 0;
+    for (Object element : list) {
+      SequenceNo seqObj = (SequenceNo) element;
+      if (seqObj.getNo() > maxSeqNo) {
+        maxSeqNo = seqObj.getNo();
+      }
+    }
+
+    Method method = elementType.getMethod("initSeqNo", int.class);
+    method.invoke(null, maxSeqNo);
+    User.initSeqNo(maxSeqNo);
+  }
+
+  private void initProjectSeqNo() {
+    int maxSeqNo = 0;
+    for (Project project : projectList) {
+      if (project.getNo() > maxSeqNo) {
+        maxSeqNo = project.getNo();
+      }
+    }
+    Project.initSeqNo(maxSeqNo);
+  }
+
+  private void initBoardSeqNo() {
+    int maxSeqNo = 0;
+    for (Board board : boardList) {
+      if (board.getNo() > maxSeqNo) {
+        maxSeqNo = board.getNo();
+      }
+    }
+    Board.initSeqNo(maxSeqNo);
+  }
+
+  private <E> void loadJson(List<E> list, String filename, Class<E> elementType) {
+    try (BufferedReader in = new BufferedReader(new FileReader(filename))) {
+
+      StringBuilder strBuilder = new StringBuilder();
+      String line;
+      while ((line = in.readLine()) != null) {
+        strBuilder.append(line);
+      }
+
+      list.addAll((List<E>) new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+          .fromJson(strBuilder.toString(), TypeToken.getParameterized(List.class, elementType)));
+
+      for (Class<?> type : elementType.getInterfaces()) {
+        if (type == SequenceNo.class) {
+          initSeqNo(list, elementType);
           break;
         }
       }
 
-      int maxUserNo = 0;
-      for (User user : userList) {
-        if (user.getNo() > maxUserNo) {
-          maxUserNo = user.getNo();
-        }
-      }
-
-      User.initSeqNo(maxUserNo);
-
-    } catch (IOException e) {
-      System.out.println("회원 정보 로딩 중 오류 발생!");
-      // e.printStackTrace();
-    }
-  }
-
-  private void loadProjects() {
-    try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("project.data"))) {
-
-      projectList = (List<Project>) in.readObject();
-
-      int maxProjectNo = 0;
-      for (Project project : projectList) {
-        if (project.getNo() > maxProjectNo) {
-          maxProjectNo = project.getNo();
-        }
-      }
-
-      Project.initSeqNo(maxProjectNo);
-
-    } catch (IOException | ClassNotFoundException e) {
-      System.out.println("프로젝트 정보 로딩 중 오류 발생!");
-      // e.printStackTrace();
-      projectList = new LinkedList<>();
-    }
-  }
-
-  private void loadBoards() {
-    try (Scanner in = new Scanner(new FileReader("board.csv"))) {
-      while (true) {
-        try {
-          String csv = in.nextLine();
-          boardList.add(Board.valueOf(csv));
-        } catch (Exception e) {
-          break;
-        }
-      }
-
-      int maxBoardNo = 0;
-      for (Board board : boardList) {
-        if (board.getNo() > maxBoardNo) {
-          maxBoardNo = board.getNo();
-        }
-      }
-
-      Board.initSeqNo(maxBoardNo);
-
-    } catch (IOException e) {
-      System.out.println("게시글 정보 로딩 중 오류 발생!");
+    } catch (Exception e) {
+      System.out.printf("%s 파일 로딩 중 오류 발생!\n", filename);
       // e.printStackTrace();
     }
   }
 
   private void saveData() {
-    saveUsers();
-    saveProjects();
-    saveBoards();
+    savaJson(userList, "user.json");
+    savaJson(projectList, "project.json");
+    savaJson(boardList, "board.json");
+
     System.out.println("데이터를 저장 했습니다.");
   }
 
-  private void saveUsers() {
-    try (FileWriter out = new FileWriter("user.csv")) {
+  private void savaJson(Object obj, String filename) {
+    try (FileWriter out = new FileWriter(filename)) {
 
-      for (User user : userList) {
-        out.write(user.toCsvString() + "\n");
-      }
+      out.write(new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(obj));
 
     } catch (IOException e) {
-      System.out.println("회원 정보 저장 중 오류 발생!");
+      System.out.printf("%s 파일 저장 중 오류 발생!\n", filename);
       e.printStackTrace();
     }
   }
 
-  private void saveProjects() {
-    try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("project.data"))) {
-
-      out.writeObject(projectList);
-
-    } catch (IOException e) {
-      System.out.println("프로젝트 정보 저장 중 오류 발생!");
-      e.printStackTrace();
-    }
-  }
-
-  private void saveBoards() {
-    try (FileWriter out = new FileWriter("board.csv")) {
-
-      for (Board board : boardList) {
-        out.write(board.toCsvString() + "\n");
-      }
-
-    } catch (IOException e) {
-      System.out.println("게시글 정보 저장 중 오류 발생!");
-      e.printStackTrace();
-    }
-  }
 }

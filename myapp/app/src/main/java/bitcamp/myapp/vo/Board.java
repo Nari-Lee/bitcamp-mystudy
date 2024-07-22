@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
-public class Board implements Serializable {
+public class Board implements Serializable, SequenceNo {
 
   private static int seqNo;
 
@@ -39,14 +39,14 @@ public class Board implements Serializable {
     board.setNo(Integer.parseInt(values[0]));
     board.setTitle(values[1]);
     board.setContent(values[2]);
-    board.setCreatedDate();
+    board.setCreatedDate(new Date(Long.parseLong(values[3])));
     board.setViewCount(Integer.parseInt(values[4]));
     return board;
   }
 
   public String toCsvString() {
     return new StringBuilder().append(no).append(",").append(title).append(",").append(content)
-        .append(",").append(createdDate).append(",").append(viewCount).toString();
+        .append(",").append(createdDate.getTime()).append(",").append(viewCount).toString();
   }
 
   @Override
@@ -71,6 +71,7 @@ public class Board implements Serializable {
     return Objects.hashCode(no);
   }
 
+  @Override
   public int getNo() {
     return no;
   }
