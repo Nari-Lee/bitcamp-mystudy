@@ -1,18 +1,16 @@
 package bitcamp.myapp.command.project;
 
 import bitcamp.myapp.command.Command;
+import bitcamp.myapp.dao.ProjectDao;
 import bitcamp.myapp.vo.Project;
 import bitcamp.util.Prompt;
-import java.util.List;
 
 public class ProjectAddCommand implements Command {
 
-  private List<Project> projectList;
-  private ProjectMemberHandler memberHandler;
+  private ProjectDao projectDao;
 
-  public ProjectAddCommand(List<Project> projectList, ProjectMemberHandler memberHandler) {
-    this.projectList = projectList;
-    this.memberHandler = memberHandler;
+  public ProjectAddCommand(ProjectDao projectDao) {
+    this.projectDao = projectDao;
   }
 
   @Override
@@ -26,12 +24,17 @@ public class ProjectAddCommand implements Command {
     project.setEndDate(Prompt.input("종료일?"));
 
     System.out.println("팀원:");
-    memberHandler.addMembers(project);
+    projectDao.addMembers(project);
 
     project.setNo(Project.getNextSeqNo());
 
-    projectList.add(project);
+    projectDao.put(project.getNo(), project);
+    projectNoList.add(project.getNo());
 
-    System.out.println("등록했습니다.");
+    try {
+      projectDao.insert(project);
+    } catch (Exception e) {
+      System.out.println("프로젝트 등록 중 오류 발생!");
+    }
   }
 }
