@@ -21,6 +21,14 @@ public class Board implements Serializable, SequenceNo {
     this.no = no;
   }
 
+  public Board(int no, String title, String content, Date createdDate, int viewCount) {
+    this.no = no;
+    this.title = title;
+    this.content = content;
+    this.createdDate = createdDate;
+    this.viewCount = viewCount;
+  }
+
   public static int getNextSeqNo() {
     return ++seqNo;
   }

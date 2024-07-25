@@ -24,6 +24,14 @@ public class User implements Serializable, SequenceNo {
     this.no = no;
   }
 
+  public User(int no, String name, String email, String password, String tel) {
+    this.no = no;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.tel = tel;
+  }
+
   public static int getNextSeqNo() {
     return ++seqNo;
   }

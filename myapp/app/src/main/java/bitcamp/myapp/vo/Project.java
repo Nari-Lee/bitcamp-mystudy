@@ -74,9 +74,14 @@ public class Project implements Serializable, SequenceNo {
       membersBuilder.append(member.toCsvString().replaceAll(",", "_"));
     }
 
-    return new StringBuilder().append(no).append(",").append(title).append(",").append(description)
-        .append(",").append(startDate).append(",").append(endDate).append(",")
-        .append(membersBuilder.toString()).toString();
+    return new StringBuilder()
+        .append(no).append(",")
+        .append(title).append(",")
+        .append(description).append(",")
+        .append(startDate).append(",")
+        .append(endDate).append(",")
+        .append(membersBuilder.toString())
+        .toString();
   }
 
   @Override
@@ -100,7 +105,7 @@ public class Project implements Serializable, SequenceNo {
   public int getNo() {
     return no;
   }
-
+  
   public void setNo(int no) {
     this.no = no;
   }
