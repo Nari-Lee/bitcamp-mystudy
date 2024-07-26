@@ -4,26 +4,27 @@ import bitcamp.myapp.command.Command;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
 import bitcamp.util.Prompt;
-import java.util.Map;
+import java.util.List;
 
 public class ProjectViewCommand implements Command {
 
-  private Map<Integer, Project> projectMap;
+  private List<Project> projectList;
 
-  public ProjectViewCommand(Map<Integer, Project> projectMap) {
-    this.projectMap = projectMap;
+  public ProjectViewCommand(List<Project> projectList) {
+    this.projectList = projectList;
   }
 
   @Override
   public void execute(String menuName) {
     System.out.printf("[%s]\n", menuName);
     int projectNo = Prompt.inputInt("프로젝트 번호?");
-
-    Project project = projectMap.get(projectNo);
-    if (project == null) {
+    int index = projectList.indexOf(new Project(projectNo));
+    if (index == -1) {
       System.out.println("없는 프로젝트입니다.");
       return;
     }
+
+    Project project = projectList.get(index);
 
     System.out.printf("프로젝트명: %s\n", project.getTitle());
     System.out.printf("설명: %s\n", project.getDescription());

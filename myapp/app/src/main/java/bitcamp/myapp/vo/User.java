@@ -3,9 +3,13 @@ package bitcamp.myapp.vo;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class User implements Serializable {
+// Serializable 인터페이스
+// - 추상 메서드가 없다.
+// - 직렬화/역직렬화를 승인한다는 표시로 사용한다.
+// - 유사한 예) Cloneable 인터페이스
+public class User implements Serializable, SequenceNo {
 
-  private static final long serialVersionUID = 1L;
+  private static int seqNo;
 
   private int no;
   private String name;
@@ -20,15 +24,21 @@ public class User implements Serializable {
     this.no = no;
   }
 
+  public static int getNextSeqNo() {
+    return ++seqNo;
+  }
+
+  public static void initSeqNo(int no) {
+    seqNo = no;
+  }
+
+  public static int getSeqNo() {
+    return seqNo;
+  }
+
   @Override
   public String toString() {
-    return "User{" +
-        "no=" + no +
-        ", name='" + name + '\'' +
-        ", email='" + email + '\'' +
-        ", password='" + password + '\'' +
-        ", tel='" + tel + '\'' +
-        '}';
+    return "User{" + "no=" + no + ", name='" + name + '\'' + ", email='" + email + '\'' + ", password='" + password + '\'' + ", tel='" + tel + '\'' + '}';
   }
 
   @Override
@@ -48,6 +58,7 @@ public class User implements Serializable {
     return Objects.hashCode(no);
   }
 
+  @Override
   public int getNo() {
     return no;
   }

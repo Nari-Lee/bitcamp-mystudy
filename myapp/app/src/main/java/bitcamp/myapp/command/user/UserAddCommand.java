@@ -1,16 +1,16 @@
 package bitcamp.myapp.command.user;
 
 import bitcamp.myapp.command.Command;
-import bitcamp.myapp.dao.UserDao;
 import bitcamp.myapp.vo.User;
 import bitcamp.util.Prompt;
+import java.util.List;
 
 public class UserAddCommand implements Command {
 
-  private UserDao userDao;
+  private List<User> userList;
 
-  public UserAddCommand(UserDao userDao) {
-    this.userDao = userDao;
+  public UserAddCommand(List<User> list) {
+    this.userList = list;
   }
 
   @Override
@@ -21,11 +21,7 @@ public class UserAddCommand implements Command {
     user.setEmail(Prompt.input("이메일?"));
     user.setPassword(Prompt.input("암호?"));
     user.setTel(Prompt.input("연락처?"));
-
-    try {
-      userDao.insert(user);
-    } catch (Exception e) {
-      System.out.println("회원 등록 중 오류 발생!");
-    }
+    user.setNo(User.getNextSeqNo());
+    userList.add(user);
   }
 }

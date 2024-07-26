@@ -1,42 +1,35 @@
 package bitcamp.myapp.command.user;
 
 import bitcamp.myapp.command.Command;
-import bitcamp.myapp.dao.UserDao;
 import bitcamp.myapp.vo.User;
 import bitcamp.util.Prompt;
+import java.util.List;
 
 public class UserUpdateCommand implements Command {
 
-  private UserDao userDao;
+  private List<User> userList;
 
-  public UserUpdateCommand(UserDao userDao) {
-    this.userDao = userDao;
+  public UserUpdateCommand(List<User> list) {
+    this.userList = list;
   }
 
   @Override
   public void execute(String menuName) {
     System.out.printf("[%s]\n", menuName);
     int userNo = Prompt.inputInt("회원번호?");
-
-    try {
-      User user = userDao.findBy(userNo);
-      if (user == null) {
-        System.out.println("없는 회원입니다.");
-        return;
-      }
-
-      user.setName(Prompt.input("이름(%s)?", user.getName()));
-      user.setEmail(Prompt.input("이메일(%s)?", user.getEmail()));
-      user.setPassword(Prompt.input("암호?"));
-      user.setTel(Prompt.input("연락처(%s)?", user.getTel()));
-
-      if (userDao.update(user)) {
-        System.out.println("변경 했습니다.");
-      } else {
-        System.out.println("변경 실패입니다!");
-      }
-    } catch (Exception e) {
-      System.out.println("데이터 변경중 오류 발생!");
+    int index = userList.indexOf(new User(userNo));
+    if (index == -1) {
+      System.out.println("없는 회원입니다.");
+      return;
     }
+
+    User user = userList.get(index);
+
+    user.setName(Prompt.input("이름(%s)?", user.getName()));
+    user.setEmail(Prompt.input("이메일(%s)?", user.getEmail()));
+    user.setPassword(Prompt.input("암호?"));
+    user.setTel(Prompt.input("연락처(%s)?", user.getTel()));
+    System.out.println("변경 했습니다.");
   }
+
 }

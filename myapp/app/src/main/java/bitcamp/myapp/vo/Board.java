@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
-public class Board implements Serializable {
+public class Board implements Serializable, SequenceNo {
 
-  private static final long serialVersionUID = 1L;
+  private static int seqNo;
 
   private int no;
   private String title;
@@ -19,6 +19,18 @@ public class Board implements Serializable {
 
   public Board(int no) {
     this.no = no;
+  }
+
+  public static int getNextSeqNo() {
+    return ++seqNo;
+  }
+
+  public static void initSeqNo(int no) {
+    seqNo = no;
+  }
+
+  public static int getSeqNo() {
+    return seqNo;
   }
 
   @Override
@@ -43,6 +55,7 @@ public class Board implements Serializable {
     return Objects.hashCode(no);
   }
 
+  @Override
   public int getNo() {
     return no;
   }
