@@ -4,50 +4,50 @@ import static bitcamp.net.ResponseStatus.ERROR;
 import static bitcamp.net.ResponseStatus.FAILURE;
 import static bitcamp.net.ResponseStatus.SUCCESS;
 
-import bitcamp.myapp.dao.UserDao;
-import bitcamp.myapp.vo.User;
+import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.vo.Board;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
-public class UserDaoSkel {
+public class BoardDaoSkel {
 
-  private UserDao userDao;
+  private BoardDao boardDao;
 
-  public UserDaoSkel(UserDao userDao) {
-    this.userDao = userDao;
+  public BoardDaoSkel(BoardDao boardDao) {
+    this.boardDao = boardDao;
   }
 
   public void service(ObjectInputStream in, ObjectOutputStream out) throws Exception {
     String command = in.readUTF();
 
-    User user = null;
+    Board board = null;
     int no = 0;
 
     switch (command) {
       case "insert":
-        user = (User) in.readObject();
-        userDao.insert(user);
+        board = (Board) in.readObject();
+        boardDao.insert(board);
         out.writeUTF(SUCCESS);
         break;
       case "list":
-        List<User> list = userDao.list();
+        List<Board> list = boardDao.list();
         out.writeUTF(SUCCESS);
         out.writeObject(list);
         break;
       case "get":
         no = in.readInt();
-        user = userDao.findBy(no);
-        if (user != null) {
+        board = boardDao.findBy(no);
+        if (board != null) {
           out.writeUTF(SUCCESS);
-          out.writeObject(user);
+          out.writeObject(board);
         } else {
           out.writeUTF(FAILURE);
         }
         break;
       case "update":
-        user = (User) in.readObject();
-        if (userDao.update(user)) {
+        board = (Board) in.readObject();
+        if (boardDao.update(board)) {
           out.writeUTF(SUCCESS);
         } else {
           out.writeUTF(FAILURE);
@@ -55,7 +55,7 @@ public class UserDaoSkel {
         break;
       case "delete":
         no = in.readInt();
-        if (userDao.delete(no)) {
+        if (boardDao.delete(no)) {
           out.writeUTF(SUCCESS);
         } else {
           out.writeUTF(FAILURE);

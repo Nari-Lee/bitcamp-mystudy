@@ -9,11 +9,12 @@ import bitcamp.myapp.command.HistoryCommand;
 import bitcamp.myapp.command.board.*;
 import bitcamp.myapp.command.project.*;
 import bitcamp.myapp.command.user.*;
-import bitcamp.myapp.dao.*;
+import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.dao.ProjectDao;
+import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.dao.stub.BoardDaoStub;
+import bitcamp.myapp.dao.stub.ProjectDaoStub;
 import bitcamp.myapp.dao.stub.UserDaoStub;
-
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 public class InitApplicationListener implements ApplicationListener {
 
@@ -23,12 +24,13 @@ public class InitApplicationListener implements ApplicationListener {
 
   @Override
   public void onStart(ApplicationContext ctx) throws Exception {
-    ObjectInputStream in = (ObjectInputStream) ctx.getAttribute("inputStream");
-    ObjectOutputStream out = (ObjectOutputStream) ctx.getAttribute("outputStream");
 
-    userDao = new UserDaoStub(in, out, "users");
-    boardDao = new ListBoardDao("data.xlsx");
-    projectDao = new ListProjectDao("data.xlsx", userDao);
+    String host = (String) ctx.getAttribute("host");
+    int port = (int) ctx.getAttribute("port");
+
+    userDao = new UserDaoStub(host, port, "users");
+    boardDao = new BoardDaoStub(host, port, "boards");
+    projectDao = new ProjectDaoStub(host, port, "projects");
 
     MenuGroup mainMenu = ctx.getMainMenu();
 
