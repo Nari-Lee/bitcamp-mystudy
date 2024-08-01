@@ -6,9 +6,22 @@ import bitcamp.menu.MenuGroup;
 import bitcamp.menu.MenuItem;
 import bitcamp.myapp.command.HelpCommand;
 import bitcamp.myapp.command.HistoryCommand;
-import bitcamp.myapp.command.board.*;
-import bitcamp.myapp.command.project.*;
-import bitcamp.myapp.command.user.*;
+import bitcamp.myapp.command.board.BoardAddCommand;
+import bitcamp.myapp.command.board.BoardDeleteCommand;
+import bitcamp.myapp.command.board.BoardListCommand;
+import bitcamp.myapp.command.board.BoardUpdateCommand;
+import bitcamp.myapp.command.board.BoardViewCommand;
+import bitcamp.myapp.command.project.ProjectAddCommand;
+import bitcamp.myapp.command.project.ProjectDeleteCommand;
+import bitcamp.myapp.command.project.ProjectListCommand;
+import bitcamp.myapp.command.project.ProjectMemberHandler;
+import bitcamp.myapp.command.project.ProjectUpdateCommand;
+import bitcamp.myapp.command.project.ProjectViewCommand;
+import bitcamp.myapp.command.user.UserAddCommand;
+import bitcamp.myapp.command.user.UserDeleteCommand;
+import bitcamp.myapp.command.user.UserListCommand;
+import bitcamp.myapp.command.user.UserUpdateCommand;
+import bitcamp.myapp.command.user.UserViewCommand;
 import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.dao.ProjectDao;
 import bitcamp.myapp.dao.UserDao;
@@ -44,7 +57,8 @@ public class InitApplicationListener implements ApplicationListener {
 
     MenuGroup projectMenu = new MenuGroup("프로젝트");
     ProjectMemberHandler memberHandler = new ProjectMemberHandler(userDao);
-    projectMenu.add(new MenuItem("등록", new ProjectAddCommand(projectDao, memberHandler)));
+    projectMenu.add(
+        new MenuItem("등록", new ProjectAddCommand(projectDao, memberHandler)));
     projectMenu.add(new MenuItem("목록", new ProjectListCommand(projectDao)));
     projectMenu.add(new MenuItem("조회", new ProjectViewCommand(projectDao)));
     projectMenu.add(new MenuItem("변경", new ProjectUpdateCommand(projectDao, memberHandler)));

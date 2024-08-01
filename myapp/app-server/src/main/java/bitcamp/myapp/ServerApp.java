@@ -6,7 +6,6 @@ import bitcamp.myapp.dao.skel.BoardDaoSkel;
 import bitcamp.myapp.dao.skel.ProjectDaoSkel;
 import bitcamp.myapp.dao.skel.UserDaoSkel;
 import bitcamp.myapp.listener.InitApplicationListener;
-
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
@@ -26,10 +25,8 @@ public class ServerApp {
 
   public static void main(String[] args) {
     ServerApp app = new ServerApp();
-
     // 애플리케이션이 시작되거나 종료될 때 알림 받을 객체의 연락처를 등록한다.
     app.addApplicationListener(new InitApplicationListener());
-
     app.execute();
   }
 
@@ -52,7 +49,7 @@ public class ServerApp {
       }
     }
 
-    // 서버에서 사용할 Dao Skeloton 객체를 준비한다.
+    // 클라이언트의 데이터 처리 요청을 수행할 Dao Skeloton 객체를 준비한다.
     userDaoSkel = (UserDaoSkel) appCtx.getAttribute("userDaoSkel");
     boardDaoSkel = (BoardDaoSkel) appCtx.getAttribute("boardDaoSkel");
     projectDaoSkel = (ProjectDaoSkel) appCtx.getAttribute("projectDaoSkel");
@@ -63,7 +60,14 @@ public class ServerApp {
       System.out.println("서버 실행 중...");
 
       while (true) {
-        processRequest(serverSocket.accept());
+        Socket socket = serverSocket.accept();
+        new Thread() {
+
+          @Override
+          public void run() {
+            processRequest(socket);
+          }
+        }.start();
       }
 
     } catch (Exception e) {
@@ -83,14 +87,13 @@ public class ServerApp {
     }
   }
 
-  void processRequest(Socket s) {
-
+  void processRequest(Socket socket) {
     String remoteHost = null;
     int port = 0;
 
-    try (Socket socket = s) {
+    try (Socket s = socket) {
 
-      InetSocketAddress addr = (InetSocketAddress) s.getRemoteSocketAddress();
+      InetSocketAddress addr = (InetSocketAddress) socket.getRemoteSocketAddress();
       remoteHost = addr.getHostString();
       port = addr.getPort();
 
@@ -113,7 +116,9 @@ public class ServerApp {
         default:
       }
     } catch (Exception e) {
-      System.out.printf("%s:%d 클라이언트 요청 처리 중 오류 발생!!\n", remoteHost, port);
+      System.out.printf("%s:%d 클라이언트 요청 처리 중 오류 발생!\n", remoteHost, port);
+      e.printStackTrace();
     }
   }
+
 }
