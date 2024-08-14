@@ -1,12 +1,13 @@
-# 39. 여러 클라이언트의 요청을 동시에 처리하기: Multi-thread 적용
+# 41. 외부키(Foreign Key) 사용하기
 
 ## 학습목표
 
-- 멀티 스레딩을 이해하고 적용할 수 있다.
+- 외부 키를 이용하여 테이블 데이터 간의 관계를 설정할 수 있다.
+- 부모/자식 테이블의 데이터를 다룰 수 있다.
 
 ## 요구사항
 
-- 클라이언트 요청을 순차적으로 처리하지 말고 동시에 처리하라!
+- 프로젝트의 멤버를 별도의 테이블로 분리하여 저장하라.
 
 ## 실행 결과
 
@@ -14,10 +15,15 @@
 
 ## 작업
 
-- 클라이언트 요청 처리를 별도의 실행 흐름에서 수행
-  - ServerApp 클래스 변경
-    - Thread의 서브 클래스를 execute() 메서드의 로컬 클래스로 정의
-  
+- DDL 및 예제 데이터 입력
+  - 프로젝트 테이블 정의 변경(myapp_projects)
+  - 프로젝트 멤버 테이블 추가(myapp_project_members)
+- ProjectDao 인터페이스 변경
+  - insertMembers() 메서드 규칙 추가
+- ProjectDaoImpl 클래스 변경
+  - insertMembers() 메서드 구현
+- ProjectAddCommand 클래스 변경
+
+
 ## 소스 파일
 
-- ServerApp.java 
