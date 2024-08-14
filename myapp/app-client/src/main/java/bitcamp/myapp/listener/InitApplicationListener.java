@@ -23,10 +23,10 @@ import java.util.Properties;
 
 public class InitApplicationListener implements ApplicationListener {
 
-  private Connection con;
+  Connection con;
 
   @Override
-  public void onStart(ApplicationContext ctx) throws Exception {
+  public boolean onStart(ApplicationContext ctx) throws Exception {
 
     Properties props = new Properties();
     props.load(new FileReader("app.properties"));
@@ -46,7 +46,7 @@ public class InitApplicationListener implements ApplicationListener {
     ctx.setAttribute("userDao", userDao);
     ctx.setAttribute("boardDao", boardDao);
     ctx.setAttribute("projectDao", projectDao);
-    
+
     MenuGroup mainMenu = ctx.getMainMenu();
 
     MenuGroup userMenu = new MenuGroup("회원");
@@ -67,17 +67,19 @@ public class InitApplicationListener implements ApplicationListener {
     mainMenu.add(projectMenu);
 
     MenuGroup boardMenu = new MenuGroup("게시판");
-    boardMenu.add(new MenuItem("등록", new BoardAddCommand(boardDao)));
+    boardMenu.add(new MenuItem("등록", new BoardAddCommand(boardDao, ctx)));
     boardMenu.add(new MenuItem("목록", new BoardListCommand(boardDao)));
     boardMenu.add(new MenuItem("조회", new BoardViewCommand(boardDao)));
-    boardMenu.add(new MenuItem("변경", new BoardUpdateCommand(boardDao)));
-    boardMenu.add(new MenuItem("삭제", new BoardDeleteCommand(boardDao)));
+    boardMenu.add(new MenuItem("변경", new BoardUpdateCommand(boardDao, ctx)));
+    boardMenu.add(new MenuItem("삭제", new BoardDeleteCommand(boardDao, ctx)));
     mainMenu.add(boardMenu);
 
     mainMenu.add(new MenuItem("도움말", new HelpCommand()));
     mainMenu.add(new MenuItem("명령내역", new HistoryCommand()));
 
     mainMenu.setExitMenuTitle("종료");
+
+    return true;
   }
 
   @Override
