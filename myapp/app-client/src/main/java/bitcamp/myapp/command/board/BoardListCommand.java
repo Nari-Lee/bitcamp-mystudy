@@ -28,6 +28,7 @@ public class BoardListCommand implements Command {
       }
     } catch (Exception e) {
       System.out.println("목록 조회 중 오류 발생!");
+      e.printStackTrace();
     }
   }
 }

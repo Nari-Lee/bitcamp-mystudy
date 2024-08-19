@@ -13,8 +13,9 @@ public class BoardUpdateCommand implements Command {
   private ApplicationContext ctx;
 
   public BoardUpdateCommand(BoardDao boardDao, ApplicationContext ctx) {
-    this.ctx = ctx;
+
     this.boardDao = boardDao;
+    this.ctx = ctx;
   }
 
   @Override
@@ -42,6 +43,7 @@ public class BoardUpdateCommand implements Command {
 
     } catch (Exception e) {
       System.out.println("변경 중 오류 발생!");
+      e.printStackTrace();
     }
   }
 }

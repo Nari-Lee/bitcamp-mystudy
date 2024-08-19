@@ -13,8 +13,9 @@ public class BoardDeleteCommand implements Command {
   private ApplicationContext ctx;
 
   public BoardDeleteCommand(BoardDao boardDao, ApplicationContext ctx) {
-    this.ctx = ctx;
+
     this.boardDao = boardDao;
+    this.ctx = ctx;
   }
 
   @Override

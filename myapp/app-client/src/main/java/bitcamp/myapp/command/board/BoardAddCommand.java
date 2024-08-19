@@ -13,8 +13,9 @@ public class BoardAddCommand implements Command {
   private ApplicationContext ctx;
 
   public BoardAddCommand(BoardDao boardDao, ApplicationContext ctx) {
-    this.ctx = ctx;
+
     this.boardDao = boardDao;
+    this.ctx = ctx;
   }
 
   @Override

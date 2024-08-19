@@ -20,8 +20,10 @@ public class AuthApplicationListener implements ApplicationListener {
       System.out.println("로그인 실패!");
       return false;
     }
-    ctx.setAttribute("loginUser", user);
 
+    // 로그인 사용자 정보를 쓸 수 있도록 보관한다.
+    ctx.setAttribute("loginUser", user);
+    
     return true;
   }
 
