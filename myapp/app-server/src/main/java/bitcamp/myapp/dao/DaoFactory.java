@@ -1,6 +1,7 @@
 package bitcamp.myapp.dao;
 
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -10,17 +11,15 @@ import java.util.List;
 
 public class DaoFactory {
 
-  private SqlSession sqlSession;
+  private SqlSessionFactory sqlSessionFactory;
 
-  public DaoFactory(SqlSession sqlSession) {
-    this.sqlSession = sqlSession;
+  public DaoFactory(SqlSessionFactory sqlSessionFactory) {
+    this.sqlSessionFactory = sqlSessionFactory;
   }
 
   public <T> T createObject(Class<T> daoType) throws Exception {
-    return (T) Proxy.newProxyInstance(
-            this.getClass().getClassLoader(),
-            new Class[]{daoType},
-            this::invoke);
+    return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {daoType},
+        this::invoke);
   }
 
   public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
@@ -45,6 +44,8 @@ public class DaoFactory {
 
     Class<?> returnType = method.getReturnType();
 
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    
     if (returnType == List.class) {
       return sqlSession.selectList(statement, paramValue);
     } else if (returnType == int.class || returnType == void.class || returnType == boolean.class) {
