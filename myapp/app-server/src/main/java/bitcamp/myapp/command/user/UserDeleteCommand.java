@@ -12,6 +12,7 @@ public class UserDeleteCommand implements Command {
   private SqlSessionFactory sqlSessionFactory;
 
   public UserDeleteCommand(UserDao userDao, SqlSessionFactory sqlSessionFactory) {
+
     this.userDao = userDao;
     this.sqlSessionFactory = sqlSessionFactory;
   }

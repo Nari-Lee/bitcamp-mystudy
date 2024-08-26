@@ -18,8 +18,10 @@ public class DaoFactory {
   }
 
   public <T> T createObject(Class<T> daoType) throws Exception {
-    return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {daoType},
-        this::invoke);
+    return (T) Proxy.newProxyInstance(
+            this.getClass().getClassLoader(),
+            new Class[]{daoType},
+            this::invoke);
   }
 
   public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
@@ -44,8 +46,9 @@ public class DaoFactory {
 
     Class<?> returnType = method.getReturnType();
 
-    SqlSession sqlSession = sqlSessionFactory.openSession();
-    
+    // 현재 스레드에 보관된 SqlSession 을 꺼낸다.
+    SqlSession sqlSession = sqlSessionFactory.openSession(false);
+
     if (returnType == List.class) {
       return sqlSession.selectList(statement, paramValue);
     } else if (returnType == int.class || returnType == void.class || returnType == boolean.class) {

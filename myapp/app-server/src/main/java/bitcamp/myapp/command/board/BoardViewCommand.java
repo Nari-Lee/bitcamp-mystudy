@@ -12,6 +12,7 @@ public class BoardViewCommand implements Command {
   private SqlSessionFactory sqlSessionFactory;
 
   public BoardViewCommand(BoardDao boardDao, SqlSessionFactory sqlSessionFactory) {
+
     this.boardDao = boardDao;
     this.sqlSessionFactory = sqlSessionFactory;
   }

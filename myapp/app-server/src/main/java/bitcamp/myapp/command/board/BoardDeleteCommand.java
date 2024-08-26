@@ -13,6 +13,7 @@ public class BoardDeleteCommand implements Command {
   private SqlSessionFactory sqlSessionFactory;
 
   public BoardDeleteCommand(BoardDao boardDao, SqlSessionFactory sqlSessionFactory) {
+
     this.boardDao = boardDao;
     this.sqlSessionFactory = sqlSessionFactory;
   }

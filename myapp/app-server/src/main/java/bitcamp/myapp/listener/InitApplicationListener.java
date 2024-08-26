@@ -29,6 +29,12 @@ public class InitApplicationListener implements ApplicationListener {
     SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
     SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(inputStream);
 
+    // 기존의 SqlSessionFactory의 기능 일부를 변경할 객체 준비
+    // 이 객체는 SqlSessionFactory를 대신해서 사용된다.
+    // 대부분의 기능은 원래의 SqlSessionFactory가 처리할 것이고,
+    // 일부 기능은 원래의 기능에 약간에 변화를 줄 것이다.
+    // 어떤 변화?
+    // SqlSession 객체를 리턴할 때 스레드 별로 사용되는 객체를 만들어 리턴한다.
     SqlSessionFactoryProxy sqlSessionFactoryProxy = new SqlSessionFactoryProxy(sqlSessionFactory);
 
     DaoFactory daoFactory = new DaoFactory(sqlSessionFactoryProxy);
@@ -53,14 +59,12 @@ public class InitApplicationListener implements ApplicationListener {
 
     MenuGroup projectMenu = new MenuGroup("프로젝트");
     ProjectMemberHandler memberHandler = new ProjectMemberHandler(userDao);
-    projectMenu.add(new MenuItem("등록",
-        new ProjectAddCommand(projectDao, memberHandler, sqlSessionFactoryProxy)));
+    projectMenu.add(
+            new MenuItem("등록", new ProjectAddCommand(projectDao, memberHandler, sqlSessionFactoryProxy)));
     projectMenu.add(new MenuItem("목록", new ProjectListCommand(projectDao)));
     projectMenu.add(new MenuItem("조회", new ProjectViewCommand(projectDao)));
-    projectMenu.add(new MenuItem("변경",
-        new ProjectUpdateCommand(projectDao, memberHandler, sqlSessionFactoryProxy)));
-    projectMenu.add(
-        new MenuItem("삭제", new ProjectDeleteCommand(projectDao, sqlSessionFactoryProxy)));
+    projectMenu.add(new MenuItem("변경", new ProjectUpdateCommand(projectDao, memberHandler, sqlSessionFactoryProxy)));
+    projectMenu.add(new MenuItem("삭제", new ProjectDeleteCommand(projectDao, sqlSessionFactoryProxy)));
     mainMenu.add(projectMenu);
 
     MenuGroup boardMenu = new MenuGroup("게시판");

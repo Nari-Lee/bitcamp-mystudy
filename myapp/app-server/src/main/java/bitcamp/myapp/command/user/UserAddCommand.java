@@ -12,6 +12,7 @@ public class UserAddCommand implements Command {
   private SqlSessionFactory sqlSessionFactory;
 
   public UserAddCommand(UserDao userDao, SqlSessionFactory sqlSessionFactory) {
+
     this.userDao = userDao;
     this.sqlSessionFactory = sqlSessionFactory;
   }

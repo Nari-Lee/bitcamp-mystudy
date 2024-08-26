@@ -12,6 +12,7 @@ public class UserUpdateCommand implements Command {
   private SqlSessionFactory sqlSessionFactory;
 
   public UserUpdateCommand(UserDao userDao, SqlSessionFactory sqlSessionFactory) {
+
     this.userDao = userDao;
     this.sqlSessionFactory = sqlSessionFactory;
   }

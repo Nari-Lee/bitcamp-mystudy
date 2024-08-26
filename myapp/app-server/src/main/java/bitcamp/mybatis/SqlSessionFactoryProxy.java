@@ -6,6 +6,7 @@ import java.sql.Connection;
 
 public class SqlSessionFactoryProxy implements SqlSessionFactory {
 
+  // SqlSession 객체를 담을 스레드 전용 변수
   ThreadLocal<SqlSession> sqlSessionThreadLocal = new ThreadLocal<>();
   private SqlSessionFactory original;
 
@@ -21,13 +22,18 @@ public class SqlSessionFactoryProxy implements SqlSessionFactory {
   @Override
   public SqlSession openSession(boolean autoCommit) {
 
+    // 1) 현재 스레드 저장소 보관된 SqlSession 객체를 찾는다.
     SqlSession sqlSession = sqlSessionThreadLocal.get();
 
+    // 2) 없으면,
     if (sqlSession == null) {
+      //    - 오리지널 객체를 통해 새로 얻는다.
       sqlSession = original.openSession(autoCommit);
-      sqlSessionThreadLocal.set(sqlSession);
 
+      //    - 다음에 이 객체를 사용하기 위해 현재 스레드 보관소에 저장한다.
+      sqlSessionThreadLocal.set(sqlSession);
     }
+
     return sqlSession;
   }
 

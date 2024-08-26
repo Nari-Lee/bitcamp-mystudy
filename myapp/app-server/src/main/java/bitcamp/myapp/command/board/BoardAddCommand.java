@@ -13,6 +13,7 @@ public class BoardAddCommand implements Command {
   private SqlSessionFactory sqlSessionFactory;
 
   public BoardAddCommand(BoardDao boardDao, SqlSessionFactory sqlSessionFactory) {
+
     this.boardDao = boardDao;
     this.sqlSessionFactory = sqlSessionFactory;
   }
