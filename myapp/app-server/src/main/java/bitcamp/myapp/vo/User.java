@@ -3,6 +3,17 @@ package bitcamp.myapp.vo;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * packageName    : bitcamp.myapp.vo
+ * fileName       : User
+ * author         : narilee
+ * date           : 24. 8. 27.
+ * description    :
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 24. 8. 27.        narilee       최초 생성
+ */
 public class User implements Serializable {
 
   private static final long serialVersionUID = 1L;
