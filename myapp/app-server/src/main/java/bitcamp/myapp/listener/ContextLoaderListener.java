@@ -27,7 +27,7 @@ import java.io.InputStream;
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
  */
-@WebListener // 서블릿 컨테이너에 이 클래스를 배치하는 태그다.
+@WebListener // 서블릿 컨테이너에 이 클래스를 배치하는 태그입니다.
 public class ContextLoaderListener implements ServletContextListener {
 
   /**

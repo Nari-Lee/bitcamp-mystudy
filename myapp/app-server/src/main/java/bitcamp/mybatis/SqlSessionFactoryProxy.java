@@ -14,6 +14,7 @@ import java.sql.Connection;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
+ * 24. 8. 28.        narilee       closeSession() 추가
  */
   public class SqlSessionFactoryProxy implements SqlSessionFactory {
 
@@ -147,5 +148,18 @@ import java.sql.Connection;
   @Override
   public Configuration getConfiguration() {
     return original.getConfiguration();
+  }
+
+  public void clearSession() {
+    try {
+      SqlSession sqlSession = sqlSessionThreadLocal.get();
+      if (sqlSession != null) {
+        sqlSession.close();
+      }
+    }catch (Exception e) {
+      // SqlSession 객체를 close() 하다가 발생된 오류는 무시합니다.
+    }
+    // 스레드에서 SqlSession을 제거합니다.
+    sqlSessionThreadLocal.remove();
   }
 }

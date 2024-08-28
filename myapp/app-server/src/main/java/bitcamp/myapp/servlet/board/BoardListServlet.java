@@ -65,11 +65,17 @@ public class BoardListServlet implements Servlet {
     out.println("<head>");
     out.println("    <meta charset='UTF-8'>");
     out.println("    <title>Title</title>");
+    out.println("    <link rel='stylesheet' href='/css/common.css'>");
     out.println("</head>");
     out.println("<body>");
 
     try {
+      out.println("<header>");
+      out.println("  <a href='/'><img src='/images/home.png'></a>");
+      out.println("        프로젝트 관리 시스템");
+      out.println("</header>");
       out.println("<h1>게시글 목록</h1>");
+      out.println("<p><a href='/board/form.html'><th>새 게사글</th></p>");
       out.println("<table border='1'>");
       out.println("<thead>");
       out.println("<tr><th>번호</th><th>제목</th><th>작성자</th><th>작성일</th><th>조회수</th></tr>");
