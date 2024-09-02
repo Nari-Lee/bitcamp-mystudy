@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -62,27 +63,7 @@ import java.io.PrintWriter;
   @Override
   public void service(ServletRequest req, ServletResponse res)
       throws ServletException, IOException {
-
-    res.setContentType("text/html;charset=UTF-8");
-    PrintWriter out = res.getWriter();
-
-    out.println("<!DOCTYPE html>");
-    out.println("<html>");
-    out.println("<head>");
-    out.println("    <meta charset='UTF-8'>");
-    out.println("    <meta http-equiv='refresh' content='1;url=/board/list'>");
-    out.println("    <title>Title</title>");
-    out.println("    <link rel='stylesheet' href='/css/common.css'>");
-    out.println("</head>");
-    out.println("<body>");
-
     try {
-      out.println("<header>");
-      out.println("  <a href='/'><img src='/images/home.png'></a>");
-      out.println("        프로젝트 관리 시스템");
-      out.println("</header>");
-      out.println("<h1>게시글 등록 결과</h1>");
-
       Board board = new Board();
       board.setTitle(req.getParameter("title"));
       board.setContent(req.getParameter("content"));
@@ -93,14 +74,12 @@ import java.io.PrintWriter;
 
       boardDao.insert(board);
       sqlSessionFactory.openSession(false).commit();
-      out.println("<p>등록 성공입니다.</p>");
+      ((HttpServletResponse) res).sendRedirect("/board/list");
 
     } catch (Exception e) {
       sqlSessionFactory.openSession(false).rollback();
-      out.println("<p>등록 중 오류 발생!</p>");
-      e.printStackTrace();
+      req.setAttribute("exception", e);
+      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
-    out.println("</body>");
-    out.println("</html>");
   }
 }

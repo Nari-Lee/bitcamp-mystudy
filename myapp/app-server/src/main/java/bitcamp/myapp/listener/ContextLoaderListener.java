@@ -34,7 +34,7 @@ public class ContextLoaderListener implements ServletContextListener {
    * 서블릿 컨테이너가 시작될 때 호출되는 메서드입니다.
    * 이 메서드에서 애플리케이션의 초기화 작업을 수행합니다.
    *
-   * @param sce 초기화된 ServletContextdㅔ 대한 정보를 포함한 ServletContextEvent 객체
+   * @param sce 초기화된 ServletContext에 대한 정보를 포함한 ServletContextEvent 객체
    */
   @Override
   public void contextInitialized(ServletContextEvent sce) {

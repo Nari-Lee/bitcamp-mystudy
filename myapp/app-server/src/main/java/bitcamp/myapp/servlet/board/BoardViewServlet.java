@@ -25,6 +25,8 @@ import java.io.PrintWriter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
+ * 24. 8. 29.        narilee       Update, Delete 추가
+ * 24. 8. 30.        narilee       list.jsp 적용
  */
 @WebServlet("/board/view")
   public class BoardViewServlet extends GenericServlet {
@@ -60,52 +62,22 @@ import java.io.PrintWriter;
   @Override
   public void service(ServletRequest req, ServletResponse res)
       throws ServletException, IOException {
-
-    res.setContentType("text/html;charset=UTF-8");
-    PrintWriter out = res.getWriter();
-
-    out.println("<!DOCTYPE html>");
-    out.println("<html>");
-    out.println("<head>");
-    out.println("    <meta charset='UTF-8'>");
-    out.println("    <title>Title</title>");
-    out.println("    <link rel='stylesheet' href='/css/common.css'>");
-    out.println("</head>");
-    out.println("<body>");
-
     try {
-      out.println("<header>");
-      out.println("  <a href='/'><img src='/images/home.png'></a>");
-      out.println("        프로젝트 관리 시스템");
-      out.println("</header>");
-      out.printf("<h1>게시판 조회</h1>");
       int boardNo = Integer.parseInt(req.getParameter("no"));
-
       Board board = boardDao.findBy(boardNo);
-      if (board == null) {
-        out.println("<p>없는 게시글입니다.</p>");
-        out.println("</body>");
-        out.println("</html>");
-        return;
+      req.setAttribute("board", board);
+
+      if (board != null) {
+        board.setViewCount(board.getViewCount() + 1);
+        boardDao.updateViewCount(board.getNo(), board.getViewCount());
+        sqlSessionFactory.openSession(false).commit();
       }
-
-      board.setViewCount(board.getViewCount() + 1);
-      boardDao.updateViewCount(board.getNo(), board.getViewCount());
-      sqlSessionFactory.openSession(false).commit();
-
-      out.printf("<p>제목: %s</p>\n", board.getTitle());
-      out.printf("<p>내용: %s</p>\n", board.getContent());
-      out.printf("<p>작성일: %1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS</p>\n", board.getCreatedDate());
-      out.printf("<p>조회수: %d</p>\n", board.getViewCount());
-      out.printf("<p>작성자: %s</p>\n", board.getWriter().getName());
+      res.setContentType("text/html;charset=UTF-8");
+      req.getRequestDispatcher("/board/view.jsp").include(req, res);
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
-      out.println("<p>조회 중 오류 발생!</p>");
-      e.printStackTrace();
+      req.setAttribute("exception", e);
+      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
-
-    out.println("</body>");
-    out.println("</html>");
   }
 }

@@ -9,12 +9,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * packageName    : bitcamp.myapp.servlet.user
+ * packageName    : bitcamp.myapp.servlet.auth
  * fileName       : LoginServlet
  * author         : narilee
  * date           : 24. 8. 28.
@@ -59,34 +60,15 @@ public class LoginServlet extends GenericServlet {
   @Override
   public void service(ServletRequest req, ServletResponse res)
       throws ServletException, IOException {
-
-    res.setContentType("text/html;charset=UTF-8");
-    PrintWriter out = res.getWriter();
-
-    out.println("<!DOCTYPE html>");
-    out.println("<html>");
-    out.println("<head>");
-    out.println("    <meta charset='UTF-8'>");
-    out.println("    <title>Title</title>");
-    out.println("    <link rel='stylesheet' href='/css/common.css'>");
-    out.println("</head>");
-    out.println("<body>");
-
     try {
-      out.println("<header>");
-      out.println("  <a href='/'><img src='/images/home.png'></a>");
-      out.println("        프로젝트 관리 시스템");
-      out.println("</header>");
-      out.println("<h1>로그인 결과</h1>");
-
       String email = req.getParameter("email");
       String password = req.getParameter("password");
 
       User user = userDao.findByEmailAndPassword(email, password);
       if (user == null) {
-        out.println("<p>이메일 또는 암호가 맞지 않습니다.</p>");
-        out.println("</body>");
-        out.println("</html>");
+        ((HttpServletResponse) res).setHeader("Refresh", "1;url=/auth/form");
+       res.setContentType("text/html;charset=UTF-8");
+        req.getRequestDispatcher("/auth/fail.jsp").include(req, res);
         return;
       }
 
@@ -104,12 +86,10 @@ public class LoginServlet extends GenericServlet {
        * 클라이언트 전용 보관소에 로그인 사용자 정보를 보관합니다.
        */
       session.setAttribute("loginUser", user);
-      out.println("<p>로그인 성공입니다!</p>");
-
+      ((HttpServletResponse)res).sendRedirect("/");
     } catch (Exception e) {
-      out.println("<p>조회 중 오류 발생!</p>");
+      req.setAttribute("exception", e);
+      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
-    out.println("</body>");
-    out.println("</html>");
   }
 }
