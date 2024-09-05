@@ -9,7 +9,7 @@
   <!--  리스너 등록 -->
 <!--   <listener>
   <listener-class>com.eomcs.web.ex02.Listner01</listener-class>
-  </listener -->>
+  </listener -->
   
     <!-- 서블릿 등록 -->
     
@@ -28,11 +28,11 @@
 <!--     <filter>
     <filter-name>f01</filter-name>
     <filter-class>com.eomcs.web.ex02.Filter01</filter-class>
-    </filter -->>
+    </filter -->
     
     <!-- 필터에 URL 경로 부여 -->
 <!--       <filter-mapping>
          <filter-name>f01</filter-name>
          <url-pattern>/ex02/*</url-pattern>
-      </filter-mapping -->>
+      </filter-mapping -->
 </web-app>

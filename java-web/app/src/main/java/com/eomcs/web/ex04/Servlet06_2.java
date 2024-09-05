@@ -30,6 +30,7 @@ public class Servlet06_2 extends GenericServlet {
     // 2) 같은 이름으로 값을 보낼 경우
     // => 예) genre=1&genre=2&genre=4
     // => 다음과 같이 한 번에 값을 리턴 받는다.
+    // => 만약 해당 이름으로 넘어온 값이 없으면 빈 배열이 아닌 null을 리턴한다.
     String[] genres = req.getParameterValues("genre");
     String[] genreData = {"", "로맨틱", "스릴러", "호러", "드라마", "액션", "SF"};
 

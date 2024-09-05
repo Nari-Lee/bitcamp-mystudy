@@ -14,7 +14,7 @@ public class App {
     Tomcat tomcat = new Tomcat();
 
     // 서버의 포트 번호 설정
-    tomcat.setPort(8888);
+    tomcat.setPort(8080);
 
     // 톰캣 서버를 실행하는 동안 사용할 임시 폴더 지정
     tomcat.setBaseDir("temp");
