@@ -3,11 +3,10 @@ package bitcamp.myapp.servlet.project;
 import bitcamp.myapp.dao.ProjectDao;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -21,9 +20,10 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/project/delete")
-public class ProjectDeleteServlet extends GenericServlet {
+public class ProjectDeleteServlet extends HttpServlet {
 
   /** Project 엔티티에 대한 데이터 액세스 객체입니다. */
   private ProjectDao projectDao;
@@ -45,7 +45,7 @@ public class ProjectDeleteServlet extends GenericServlet {
   }
 
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
       int projectNo = Integer.parseInt(req.getParameter("no"));
@@ -53,7 +53,7 @@ public class ProjectDeleteServlet extends GenericServlet {
       projectDao.deleteMembers(projectNo);
       if (projectDao.delete(projectNo)) {
         sqlSessionFactory.openSession(false).commit();
-        ((HttpServletResponse) res).sendRedirect("/project/list");
+        res.sendRedirect("/project/list");
       } else {
         throw new Exception("없는 프로젝트입니다.");
       }

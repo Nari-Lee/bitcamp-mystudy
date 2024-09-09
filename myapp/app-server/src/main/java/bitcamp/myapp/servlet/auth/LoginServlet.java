@@ -3,16 +3,10 @@ package bitcamp.myapp.servlet.auth;
 import bitcamp.myapp.dao.UserDao;
 import bitcamp.myapp.vo.User;
 
-import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * packageName    : bitcamp.myapp.servlet.auth
@@ -27,7 +21,7 @@ import java.io.PrintWriter;
  * 24. 8. 28.        narilee       최초 생성
  */
 @WebServlet("/auth/login")
-public class LoginServlet extends GenericServlet {
+public class LoginServlet extends HttpServlet {
 
   /** User 엔티티에 대한 테이터 엑세스 객체입니다. */
   private UserDao userDao;
@@ -45,6 +39,13 @@ public class LoginServlet extends GenericServlet {
     userDao = (UserDao) this.getServletContext().getAttribute("userDao");
   }
 
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse res)
+      throws ServletException, IOException {
+    res.setContentType("text/html;charset=UTF-8");
+    req.getRequestDispatcher("/auth/form.jsp").include(req, res);
+  }
+
   /**
    * 클라이언트의 요청을 처리하고 응답을 생성합니다.
    * 이 메서드는 요청 파라미터로 받은 이메일과 비밀번호를 검증하고,
@@ -58,7 +59,7 @@ public class LoginServlet extends GenericServlet {
    * @throws IOException 입출력 작업 중 오류가 발생한 경우
    */
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
       String email = req.getParameter("email");
@@ -70,6 +71,16 @@ public class LoginServlet extends GenericServlet {
        res.setContentType("text/html;charset=UTF-8");
         req.getRequestDispatcher("/auth/fail.jsp").include(req, res);
         return;
+      }
+
+      if (req.getParameter("saveEmail") != null) {
+        Cookie cookie = new Cookie("email", email);
+        cookie.setMaxAge(60 * 60 * 24 * 7);
+        res.addCookie(cookie);
+      } else {
+        Cookie cookie = new Cookie("email", "test@test.com");
+        cookie.setMaxAge(0);
+        res.addCookie(cookie);
       }
 
       /**
@@ -86,7 +97,7 @@ public class LoginServlet extends GenericServlet {
        * 클라이언트 전용 보관소에 로그인 사용자 정보를 보관합니다.
        */
       session.setAttribute("loginUser", user);
-      ((HttpServletResponse)res).sendRedirect("/");
+      res.sendRedirect("/");
     } catch (Exception e) {
       req.setAttribute("exception", e);
       req.getRequestDispatcher("/error.jsp").forward(req, res);

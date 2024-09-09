@@ -7,10 +7,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * packageName    : bitcamp.myapp.servlet.board
@@ -24,9 +24,10 @@ import java.io.PrintWriter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/board/add")
-  public class BoardAddServlet extends GenericServlet {
+  public class BoardAddServlet extends HttpServlet {
 
   /** Board 엔티티에 대한 대이터 액세스 객체입니다. */
   private BoardDao boardDao;
@@ -48,6 +49,14 @@ import java.io.PrintWriter;
     this.sqlSessionFactory = (SqlSessionFactory) ctx.getAttribute("sqlSessionFactory");
   }
 
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse res)
+      throws ServletException, IOException {
+    res.setContentType("text/html;charset=UTF-8");
+    req.getRequestDispatcher("/board/form.jsp").include(req, res);
+
+  }
+
   /**
    * 클라이언트의 게시글 등록 요청을 처리하고 응답을 생성합니다.
    * 이 메서드는 요청 파라미터로 받은 게시글 정보를 데이터베이스에 저장하고,
@@ -61,7 +70,7 @@ import java.io.PrintWriter;
    * @throws IOException 입출력 작업 중 오류가 발생한 경우
    */
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
       Board board = new Board();
@@ -69,12 +78,12 @@ import java.io.PrintWriter;
       board.setContent(req.getParameter("content"));
 
       // 클라이언트 전용 보관소애서 로그인 사용자 정보를 꺼냅니다.
-      User loginUser = (User) ((HttpServletRequest)req).getSession().getAttribute("loginUser");
+      User loginUser = (User) req.getSession().getAttribute("loginUser");
       board.setWriter(loginUser);
 
       boardDao.insert(board);
       sqlSessionFactory.openSession(false).commit();
-      ((HttpServletResponse) res).sendRedirect("/board/list");
+      res.sendRedirect("/board/list");
 
     } catch (Exception e) {
       sqlSessionFactory.openSession(false).rollback();

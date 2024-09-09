@@ -3,13 +3,12 @@ package bitcamp.myapp.servlet.user;
 import bitcamp.myapp.dao.UserDao;
 import bitcamp.myapp.vo.User;
 
-import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * packageName    : bitcamp.myapp.servlet.user
@@ -26,9 +25,10 @@ import java.io.PrintWriter;
  * 24. 8. 27.        narilee       최초 생성
  * 24. 8. 29.        narilee       Update, Delete 추가
  * 24. 8. 30.        narilee       list.jsp 적용
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/user/view")
-public class UserViewServlet extends GenericServlet {
+public class UserViewServlet extends HttpServlet {
 
   /** User 엔티티에 대한 테이터 엑세스 객체입니다. */
   private UserDao userDao;
@@ -53,7 +53,7 @@ public class UserViewServlet extends GenericServlet {
    * @throws IOException      입출력 작업 중 오류가 발생한 경우
    */
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
     try {

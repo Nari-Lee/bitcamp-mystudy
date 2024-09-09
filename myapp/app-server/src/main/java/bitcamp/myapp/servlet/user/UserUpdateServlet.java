@@ -4,14 +4,12 @@ import bitcamp.myapp.dao.UserDao;
 import bitcamp.myapp.vo.User;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * packageName    : bitcamp.myapp.servlet.user
@@ -23,9 +21,10 @@ import java.io.PrintWriter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/user/update")
-public class UserUpdateServlet extends GenericServlet {
+public class UserUpdateServlet extends HttpServlet {
 
   private UserDao userDao;
   private SqlSessionFactory sqlSessionFactory;
@@ -37,7 +36,7 @@ public class UserUpdateServlet extends GenericServlet {
   }
 
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
     try {
@@ -50,7 +49,7 @@ public class UserUpdateServlet extends GenericServlet {
 
       if (userDao.update(user)) {
         sqlSessionFactory.openSession(false).commit();
-        ((HttpServletResponse) res).sendRedirect("/user/list");
+        res.sendRedirect("/user/list");
       } else {
         throw new Exception("없는 회원입니다!");
       }

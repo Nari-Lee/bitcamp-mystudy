@@ -5,6 +5,9 @@ import bitcamp.myapp.vo.Board;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -21,9 +24,10 @@ import java.util.List;
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
  * 24. 8. 30.        narilee       list.jsp 적용
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/board/list")
-public class BoardListServlet extends GenericServlet {
+public class BoardListServlet extends HttpServlet {
 
   private BoardDao boardDao;
 
@@ -47,7 +51,7 @@ public class BoardListServlet extends GenericServlet {
    * @throws IOException 입출력 작업 중 오류가 발생한 경우
    */
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
     try {

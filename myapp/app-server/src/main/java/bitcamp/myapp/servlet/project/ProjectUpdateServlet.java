@@ -7,9 +7,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Date;
 import java.util.ArrayList;
 
@@ -23,9 +24,10 @@ import java.util.ArrayList;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/project/update")
-  public class ProjectUpdateServlet extends GenericServlet {
+  public class ProjectUpdateServlet extends HttpServlet {
 
   /** Project 엔티티에 대한 데이터 액세스 객체입니다. */
   private ProjectDao projectDao;
@@ -47,7 +49,7 @@ import java.util.ArrayList;
   }
 
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
     try {
@@ -76,7 +78,7 @@ import java.util.ArrayList;
         projectDao.insertMembers(project.getNo(), project.getMembers());
       }
       sqlSessionFactory.openSession(false).commit();
-      ((HttpServletResponse) res).sendRedirect("/project/list");
+      res.sendRedirect("/project/list");
 
     } catch (Exception e) {
       sqlSessionFactory.openSession(false).rollback();

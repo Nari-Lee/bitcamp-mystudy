@@ -1,17 +1,20 @@
 package bitcamp.myapp.servlet.project;
 
 import bitcamp.myapp.dao.ProjectDao;
+import bitcamp.myapp.dao.UserDao;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * packageName    : bitcamp.myapp.servlet.project
@@ -25,9 +28,10 @@ import java.util.ArrayList;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/project/add")
-public class ProjectAddServlet extends GenericServlet {
+public class ProjectAddServlet extends HttpServlet {
 
   /** Project 엔티티에 대한 데이터 액세스 객체입니다. */
   private ProjectDao projectDao;
@@ -38,7 +42,7 @@ public class ProjectAddServlet extends GenericServlet {
   /**
    * 서블릿 객체를 초기화합니다.
    * 이 메서드는 서블릿이 배치될 때 서블릿 컨테이너에 의헤 호출됩니다.
-   * ProjectDao와 SqlSessionFactory 객체를 ServletContext에서 가져와 초기화합니다.
+   * ProjectDao, UserDao와 SqlSessionFactory 객체를 ServletContext에서 가져와 초기화합니다.
    *
    * @throws ServletException 서블릿 초기화 중 오류가 발생한 경우
    */
@@ -62,31 +66,20 @@ public class ProjectAddServlet extends GenericServlet {
    * @throws IOException 입출력 작업 중 오류가 발생한 경우
    */
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
-      Project project = new Project();
-      project.setTitle(req.getParameter("title"));
-      project.setDescription(req.getParameter("description"));
-      project.setStartDate(Date.valueOf(req.getParameter("startDate")));
-      project.setEndDate(Date.valueOf(req.getParameter("endDate")));
-
-      String[] memberNos = req.getParameterValues("member");
-      if (memberNos != null) {
-        ArrayList<User> members = new ArrayList<>();
-        for (String memberNo : memberNos) {
-          members.add(new User(Integer.parseInt(memberNo)));
-        }
-        project.setMembers(members);
-      }
-
+      Project project = (Project) req.getSession().getAttribute("project");
       projectDao.insert(project);
 
       if (project.getMembers() != null && project.getMembers().size() > 0) {
         projectDao.insertMembers(project.getNo(), project.getMembers());
       }
       sqlSessionFactory.openSession(false).commit();
-      ((HttpServletResponse) res).sendRedirect("/project/list");
+      res.sendRedirect("/project/list");
+
+      // 세션에 임시 보간했던 Project 객치를 제거한다.
+      req.getSession().removeAttribute("project");
 
     } catch (Exception e) {
       sqlSessionFactory.openSession(false).rollback();

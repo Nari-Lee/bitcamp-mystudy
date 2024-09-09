@@ -4,13 +4,12 @@ import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.vo.Board;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * packageName    : bitcamp.myapp.servlet.board
@@ -27,9 +26,10 @@ import java.io.PrintWriter;
  * 24. 8. 27.        narilee       최초 생성
  * 24. 8. 29.        narilee       Update, Delete 추가
  * 24. 8. 30.        narilee       list.jsp 적용
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/board/view")
-  public class BoardViewServlet extends GenericServlet {
+  public class BoardViewServlet extends HttpServlet {
 
   /** User 엔티티에 대한 테이터 엑세스 객체입니다. */
   private BoardDao boardDao;
@@ -60,7 +60,7 @@ import java.io.PrintWriter;
    * @throws IOException 입출력 작업 중 오류가 발생한 경우
    */
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
       int boardNo = Integer.parseInt(req.getParameter("no"));

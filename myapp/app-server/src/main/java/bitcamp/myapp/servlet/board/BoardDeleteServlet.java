@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -24,9 +25,10 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
+ * 24. 9. 05         narilee       HttpServlet으로 변경
  */
 @WebServlet("/board/delete")
-  public class BoardDeleteServlet extends GenericServlet {
+  public class BoardDeleteServlet extends HttpServlet {
 
   private BoardDao boardDao;
   private SqlSessionFactory sqlSessionFactory;
@@ -38,7 +40,7 @@ import java.io.IOException;
   }
 
   @Override
-  public void service(ServletRequest req, ServletResponse res)
+  protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
       User loginUser = (User) ((HttpServletRequest) req).getSession().getAttribute("loginUser");
@@ -53,7 +55,7 @@ import java.io.IOException;
 
       boardDao.delete(boardNo);
       sqlSessionFactory.openSession(false).commit();
-      ((HttpServletResponse) res).sendRedirect("/board/list");
+      res.sendRedirect("/board/list");
 
     } catch (Exception e) {
       sqlSessionFactory.openSession(false).rollback();

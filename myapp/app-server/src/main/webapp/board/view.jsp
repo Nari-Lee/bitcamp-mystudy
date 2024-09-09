@@ -20,7 +20,7 @@ trimDirectiveWhitespaces="true"%>
 } else {
 %>
 
-<form action='/board/update'>
+<form action='/board/update' method="post">
   번호: <input name='no' readonly type='text' value='<%=board.getNo()%>'><br>
   제목: <input name='title' type='text' value='<%=board.getTitle()%>'><br>
   내용: <textarea name='content'><%=board.getContent()%></textarea><br>
