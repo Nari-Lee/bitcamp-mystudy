@@ -23,6 +23,7 @@ import java.io.IOException;
  * 24. 8. 28.        narilee       최초 생성
  * 24. 8. 30         narilee       수정
  * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narileel      UTF-8 필터 적용
  */
 @WebServlet("/user/add")
 public class UserAddServlet extends HttpServlet {
@@ -47,6 +48,7 @@ public class UserAddServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
+
     try {
       User user = new User();
       user.setName(req.getParameter("name"));

@@ -9,9 +9,10 @@ trimDirectiveWhitespaces="true"%>
 
 
 <h1>게시글 등록</h1 >
-<form action='/board/add' method="post">
+<form action='/board/add' method="post" enctype="multipart/form-data">
     제목: <input name='title' type='text'><br>
     내용: <textarea name='content' type='text'></textarea><br>
+    첨부파일: <input name="files" type="file" multiple><br>
     <input type='submit' value='등록'>
 </form>
 

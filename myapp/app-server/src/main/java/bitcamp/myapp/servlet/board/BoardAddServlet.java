@@ -1,16 +1,22 @@
 package bitcamp.myapp.servlet.board;
 
 import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
 
 /**
  * packageName    : bitcamp.myapp.servlet.board
@@ -24,8 +30,10 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narileel      UTF-8 필터 적용, 첨부파일 적용
  */
+@MultipartConfig(maxFileSize = 1024 * 1024 * 60, maxRequestSize = 1024 * 1024 * 100)
 @WebServlet("/board/add")
   public class BoardAddServlet extends HttpServlet {
 
@@ -35,6 +43,7 @@ import java.io.IOException;
   /** 데이터베이스 세션을 관리하는 SqlSessionFactory 객체입니다. */
   private SqlSessionFactory sqlSessionFactory;
 
+  private String uploadDir;
   /**
    * 서블릿 객체를 초기화합니다.
    * 이 메서드는 서블릿이 배치될 떄 서블릿 컨테이너에 의해 호출됩니다.
@@ -47,14 +56,13 @@ import java.io.IOException;
     ServletContext ctx = this.getServletContext();
     this.boardDao = (BoardDao) ctx.getAttribute("boardDao");
     this.sqlSessionFactory = (SqlSessionFactory) ctx.getAttribute("sqlSessionFactory");
+    this.uploadDir = ctx.getRealPath("/upload/board");
   }
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse res)
-      throws ServletException, IOException {
+  protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
     res.setContentType("text/html;charset=UTF-8");
     req.getRequestDispatcher("/board/form.jsp").include(req, res);
-
   }
 
   /**
@@ -70,18 +78,42 @@ import java.io.IOException;
    * @throws IOException 입출력 작업 중 오류가 발생한 경우
    */
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse res)
-      throws ServletException, IOException {
+  protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
     try {
+      User loginUser = (User) req.getSession().getAttribute("loginUser");
+      if (loginUser == null) {
+        throw new Exception("로그인 하지 않았습니다.");
+      }
+
       Board board = new Board();
+      board.setWriter(loginUser);
       board.setTitle(req.getParameter("title"));
       board.setContent(req.getParameter("content"));
 
-      // 클라이언트 전용 보관소애서 로그인 사용자 정보를 꺼냅니다.
-      User loginUser = (User) req.getSession().getAttribute("loginUser");
-      board.setWriter(loginUser);
+      ArrayList<AttachedFile> attachedFiles = new ArrayList<>();
+
+      Collection<Part> parts = req.getParts();
+      for (Part part : parts) {
+        if (!part.getName().equals("files") || part.getSize() == 0) {
+          continue;
+        }
+
+        AttachedFile attachedFile = new AttachedFile();
+        attachedFile.setFilename(UUID.randomUUID().toString());
+        attachedFile.setOriginFilename(part.getSubmittedFileName());
+
+        part.write(this.uploadDir + "/" + attachedFile.getFilename());
+
+        attachedFiles.add(attachedFile);
+      }
+
+      board.setAttachedFiles(attachedFiles);
 
       boardDao.insert(board);
+      if (board.getAttachedFiles().size() > 0) {
+        boardDao.insertFiles(board);
+      }
+
       sqlSessionFactory.openSession(false).commit();
       res.sendRedirect("/board/list");
 
@@ -91,4 +123,5 @@ import java.io.IOException;
       req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
+
 }

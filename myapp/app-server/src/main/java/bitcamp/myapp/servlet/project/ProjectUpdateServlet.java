@@ -25,6 +25,7 @@ import java.util.ArrayList;
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
  * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narileel      UTF-8 필터 적용
  */
 @WebServlet("/project/update")
   public class ProjectUpdateServlet extends HttpServlet {

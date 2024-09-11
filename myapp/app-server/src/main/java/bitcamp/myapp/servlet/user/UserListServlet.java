@@ -25,6 +25,7 @@ import java.util.List;
  * 24. 8. 29.        narilee       HeaderServlet으로 공통부분 옮김
  * 24. 8. 30.        narilee       list.jsp 적용
  * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narileel      UTF-8 필터 적용
  */
 @WebServlet("/user/list")
 public class UserListServlet extends HttpServlet {

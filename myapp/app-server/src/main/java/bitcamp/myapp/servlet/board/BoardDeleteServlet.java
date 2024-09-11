@@ -1,18 +1,17 @@
 package bitcamp.myapp.servlet.board;
 
 import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -25,25 +24,28 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narilee       첨부파일 삭제 추가
  */
 @WebServlet("/board/delete")
   public class BoardDeleteServlet extends HttpServlet {
 
   private BoardDao boardDao;
   private SqlSessionFactory sqlSessionFactory;
+  private String uploadDir;
 
   @Override
   public void init() throws ServletException {
     boardDao = (BoardDao) getServletContext().getAttribute("boardDao");
     sqlSessionFactory = (SqlSessionFactory) getServletContext().getAttribute("sqlSessionFactory");
+    uploadDir = getServletContext().getInitParameter("uploadDir");
   }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
-      User loginUser = (User) ((HttpServletRequest) req).getSession().getAttribute("loginUser");
+      User loginUser = (User) req.getSession().getAttribute("loginUser");
       int boardNo = Integer.parseInt(req.getParameter("no"));
       Board board = boardDao.findBy(boardNo);
 
@@ -53,6 +55,14 @@ import java.io.IOException;
         throw new Exception("삭제 권한이 없습니다.");
       }
 
+      for (AttachedFile attachedFile : board.getAttachedFiles()) {
+        File file = new File(uploadDir + "/" + attachedFile.getFilename());
+        if (file.exists()) {
+          file.delete();
+        }
+      }
+
+      boardDao.deleteFiles(boardNo);
       boardDao.delete(boardNo);
       sqlSessionFactory.openSession(false).commit();
       res.sendRedirect("/board/list");

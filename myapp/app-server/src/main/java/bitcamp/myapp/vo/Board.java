@@ -2,6 +2,7 @@ package bitcamp.myapp.vo;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Objects;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
+ * 24. 9. 09.        narilee       파일 추가
  */
 public class Board implements Serializable {
 
@@ -34,6 +36,8 @@ public class Board implements Serializable {
   private Date createdDate;
   /** 게시물 조회수 */
   private int viewCount;
+  /** 첨부 파일 */
+  private List<AttachedFile> attachedFiles;
 
   /**
    * 기본 생성자입니다.
@@ -202,5 +206,13 @@ public class Board implements Serializable {
    */
   public void setWriter(User writer) {
     this.writer = writer;
+  }
+
+  public List<AttachedFile> getAttachedFiles() {
+    return attachedFiles;
+  }
+
+  public void setAttachedFiles(List<AttachedFile> attachedFiles) {
+    this.attachedFiles = attachedFiles;
   }
 }

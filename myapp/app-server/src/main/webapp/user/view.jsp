@@ -1,4 +1,3 @@
-<%@ page import="java.util.List" %>
 <%@ page import="bitcamp.myapp.vo.User" %>
 <%@ page
     language="java"

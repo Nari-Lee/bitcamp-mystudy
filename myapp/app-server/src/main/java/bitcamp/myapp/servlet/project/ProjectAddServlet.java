@@ -29,6 +29,7 @@ import java.util.List;
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
  * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narileel      UTF-8 필터 적용, 첨부파일 추가
  */
 @WebServlet("/project/add")
 public class ProjectAddServlet extends HttpServlet {
@@ -68,6 +69,7 @@ public class ProjectAddServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
+
     try {
       Project project = (Project) req.getSession().getAttribute("project");
       projectDao.insert(project);
