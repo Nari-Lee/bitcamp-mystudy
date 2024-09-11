@@ -4,6 +4,10 @@ import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.dao.DaoFactory;
 import bitcamp.myapp.dao.ProjectDao;
 import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.BoardService;
+import bitcamp.myapp.service.DefaultBoardService;
+import bitcamp.myapp.service.DefaultUserService;
+import bitcamp.myapp.service.UserService;
 import bitcamp.mybatis.SqlSessionFactoryProxy;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -26,6 +30,7 @@ import java.io.InputStream;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
+ * 24. 9. 11.        narilee       dao에서 service로 변경
  */
 @WebListener // 서블릿 컨테이너에 이 클래스를 배치하는 태그입니다.
 public class ContextLoaderListener implements ServletContextListener {
@@ -55,11 +60,14 @@ public class ContextLoaderListener implements ServletContextListener {
       BoardDao boardDao = daoFactory.createObject(BoardDao.class);
       ProjectDao projectDao = daoFactory.createObject(ProjectDao.class);
 
+      UserService userService = new DefaultUserService(userDao, sqlSessionFactoryProxy);
+      BoardService boardService = new DefaultBoardService(boardDao, sqlSessionFactoryProxy);
+
       // ServletContext에 객체 저장
       ServletContext ctx = sce.getServletContext();
       ctx.setAttribute("sqlSessionFactory", sqlSessionFactoryProxy);
-      ctx.setAttribute("userDao", userDao);
-      ctx.setAttribute("boardDao", boardDao);
+      ctx.setAttribute("userService", userService);
+      ctx.setAttribute("boardService", boardService);
       ctx.setAttribute("projectDao", projectDao);
 
     } catch (Exception e) {

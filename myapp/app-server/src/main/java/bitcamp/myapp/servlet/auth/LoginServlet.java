@@ -67,7 +67,7 @@ public class LoginServlet extends HttpServlet {
 
       User user = userDao.findByEmailAndPassword(email, password);
       if (user == null) {
-        ((HttpServletResponse) res).setHeader("Refresh", "1;url=/auth/form");
+        res.setHeader("Refresh", "1;url=/auth/form");
        res.setContentType("text/html;charset=UTF-8");
         req.getRequestDispatcher("/auth/fail.jsp").include(req, res);
         return;

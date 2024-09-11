@@ -1,6 +1,7 @@
 package bitcamp.myapp.servlet.board;
 
 import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
@@ -31,17 +32,15 @@ import java.util.UUID;
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
  * 24. 9. 05.        narilee       HttpServlet으로 변경
- * 24. 9. 09.        narileel      UTF-8 필터 적용, 첨부파일 적용
+ * 24. 9. 09.        narilee       UTF-8 필터 적용, 첨부파일 적용
+ * 24. 9. 11.        narilee       BoardService 적용
  */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 60, maxRequestSize = 1024 * 1024 * 100)
 @WebServlet("/board/add")
   public class BoardAddServlet extends HttpServlet {
 
   /** Board 엔티티에 대한 대이터 액세스 객체입니다. */
-  private BoardDao boardDao;
-
-  /** 데이터베이스 세션을 관리하는 SqlSessionFactory 객체입니다. */
-  private SqlSessionFactory sqlSessionFactory;
+  private BoardService boardService;
 
   private String uploadDir;
   /**
@@ -53,10 +52,7 @@ import java.util.UUID;
    */
   @Override
   public void init() throws ServletException {
-    ServletContext ctx = this.getServletContext();
-    this.boardDao = (BoardDao) ctx.getAttribute("boardDao");
-    this.sqlSessionFactory = (SqlSessionFactory) ctx.getAttribute("sqlSessionFactory");
-    this.uploadDir = ctx.getRealPath("/upload/board");
+    boardService = (BoardService) getServletContext().getAttribute("boardService");
   }
 
   @Override
@@ -109,16 +105,11 @@ import java.util.UUID;
 
       board.setAttachedFiles(attachedFiles);
 
-      boardDao.insert(board);
-      if (board.getAttachedFiles().size() > 0) {
-        boardDao.insertFiles(board);
-      }
+      boardService.add(board);
 
-      sqlSessionFactory.openSession(false).commit();
       res.sendRedirect("/board/list");
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
       req.getRequestDispatcher("/error.jsp").forward(req, res);
     }

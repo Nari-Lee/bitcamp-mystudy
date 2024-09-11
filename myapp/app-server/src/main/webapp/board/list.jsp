@@ -1,5 +1,5 @@
-<%@ page import="java.util.List" %>
-<%@ page import="bitcamp.myapp.vo.Board" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page
     language="java"
     contentType="text/html;charset=UTF-8"
@@ -15,20 +15,15 @@ trimDirectiveWhitespaces="true"%>
     <tr><th>번호</th><th>제목</th><th>작성자</th><th>작성일</th><th>조회수</th></tr>
   </thead>
 <tbody>
-<%
-  List<Board> list = (List<Board>) request.getAttribute("list");
-for (Board board : list) {
-%>
+<c:forEach items="${list}" var="board">
 <tr>
-  <td><%=board.getNo()%></td>
-  <td><a href='/board/view?no=<%=board.getNo()%>'><%=board.getTitle()%></a></td>
-  <td><%=board.getWriter().getName()%></td>
-  <td><%=String.format("%tY-%1$tm-%1$td", board.getCreatedDate())%></td>
-  <td><%=board.getViewCount()%></td>
+  <td>${board.no}</td>
+  <td><a href='/board/view?no=${board.no}'>${board.title}</a></td>
+  <td>${board.writer.name}</td>
+  <td><fmt:formatDate value="${board.createdDate}" pattern="yyyy-MM-dd HH:mm:ss" /></td>
+  <td>${board.viewCount}</td>
 </tr>
-<%
-}
-%>
+</c:forEach>
 </tbody>
 </table>
 

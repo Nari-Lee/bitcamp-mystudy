@@ -1,6 +1,7 @@
 package bitcamp.myapp.servlet.board;
 
 import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.Board;
 
 import javax.servlet.*;
@@ -24,12 +25,13 @@ import java.util.List;
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
  * 24. 8. 30.        narilee       list.jsp 적용
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 11.        narilee       BoardService 적용
  */
 @WebServlet("/board/list")
 public class BoardListServlet extends HttpServlet {
 
-  private BoardDao boardDao;
+  private BoardService boardService;
 
   /**
    * 서블릿 객체를 생성한 후 바로 호출합니다.
@@ -37,7 +39,7 @@ public class BoardListServlet extends HttpServlet {
    */
   @Override
   public void init() {
-    boardDao = (BoardDao) this.getServletContext().getAttribute("boardDao");
+    boardService = (BoardService) getServletContext().getAttribute("boardService");
   }
 
   /**
@@ -55,7 +57,7 @@ public class BoardListServlet extends HttpServlet {
       throws ServletException, IOException {
 
     try {
-      List<Board> list = boardDao.list();
+      List<Board> list = boardService.list();
 
       req.setAttribute("list", list);
 

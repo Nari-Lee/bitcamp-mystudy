@@ -1,8 +1,7 @@
 package bitcamp.myapp.servlet.user;
 
-import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.User;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
@@ -21,21 +20,19 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
- * 24. 8. 30         narilee       수정
- * 24. 9. 05         narilee       HttpServlet으로 변경
- * 24. 9. 09.        narileel      UTF-8 필터 적용
+ * 24. 8. 30.        narilee       수정
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narilee       UTF-8 필터 적용
+ * 24. 9. 11.        narilee       UserService 적용
  */
 @WebServlet("/user/add")
 public class UserAddServlet extends HttpServlet {
 
-  private UserDao userDao;
-  private SqlSessionFactory sqlSessionFactory;
+  private UserService userService;
 
   @Override
   public void init() throws ServletException {
-    ServletContext servletContext = getServletContext();
-    this.userDao = (UserDao) servletContext.getAttribute("userDao");
-    this.sqlSessionFactory = (SqlSessionFactory) servletContext.getAttribute("sqlSessionFactory");
+    this.userService = (UserService) getServletContext().getAttribute("userService");
   }
 
   @Override
@@ -56,12 +53,10 @@ public class UserAddServlet extends HttpServlet {
       user.setPassword(req.getParameter("password"));
       user.setTel(req.getParameter("tel"));
 
-      userDao.insert(user);
-      sqlSessionFactory.openSession(false).commit();
+      userService.add(user);
       res.sendRedirect("/user/list");
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
       req.getRequestDispatcher("/error.jsp").forward(req, res);
     }

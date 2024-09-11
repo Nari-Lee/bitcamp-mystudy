@@ -1,6 +1,7 @@
 package bitcamp.myapp.servlet.user;
 
 import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.User;
 
 import javax.servlet.ServletException;
@@ -26,12 +27,13 @@ import java.io.IOException;
  * 24. 8. 29.        narilee       Update, Delete 추가
  * 24. 8. 30.        narilee       list.jsp 적용
  * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 11.        narilee       UserService 적용
  */
 @WebServlet("/user/view")
 public class UserViewServlet extends HttpServlet {
 
   /** User 엔티티에 대한 테이터 엑세스 객체입니다. */
-  private UserDao userDao;
+  private UserService userService;
 
   /**
    * 서블릿 객체를 초기화합니다. 이 메서드는 서블릿이 배치될 때 서블릿 컨테이너에 의해 호출됩니다. UserDao 객체를 ServletContext에서 가져와 초기화합니다.
@@ -41,7 +43,7 @@ public class UserViewServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     // 서블릿 컨테이너 ---> init(ServletConfig) ---> init() 호출합니다.
-    userDao = (UserDao) this.getServletContext().getAttribute("userDao");
+    userService = (UserService) getServletContext().getAttribute("userService");
   }
 
   /**
@@ -58,7 +60,7 @@ public class UserViewServlet extends HttpServlet {
 
     try {
       int userNo = Integer.parseInt(req.getParameter("no"));
-      User user = userDao.findBy(userNo);
+      User user = userService.get(userNo);
       req.setAttribute("user", user);
 
       res.setContentType("text/html;charset=UTF-8");

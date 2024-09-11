@@ -1,6 +1,6 @@
 package bitcamp.myapp.servlet.user;
 
-import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.User;
 
 import javax.servlet.*;
@@ -14,7 +14,8 @@ import java.util.List;
 /**
  * packageName    : bitcamp.myapp.servlet.user
  * fileName       : UserListServlet
- * author         : narilee date           : 24. 8. 27.
+ * author         : narilee
+ * date           : 24. 8. 27.
  * description    : 사용자 목록을 표시하는 서블릿 클래스입니다.
  *                  이 서블릿은 '/user/list' URL 패턴에 매핑되어 있으며,
  *                  데이터베이스에서 사용자 목록을 조회하여 HTML 형식으로 출력합니다.
@@ -24,13 +25,14 @@ import java.util.List;
  * 24. 8. 27.        narilee       최초 생성
  * 24. 8. 29.        narilee       HeaderServlet으로 공통부분 옮김
  * 24. 8. 30.        narilee       list.jsp 적용
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
  * 24. 9. 09.        narileel      UTF-8 필터 적용
+ * 24. 9. 11.        narilee       UserService 적용
  */
 @WebServlet("/user/list")
 public class UserListServlet extends HttpServlet {
 
-  private UserDao userDao;
+  private UserService userService;
 
   /**
    * 서블릿 객체를 생성한 후 바로 호출합니다.
@@ -38,7 +40,7 @@ public class UserListServlet extends HttpServlet {
    */
   @Override
   public void init() {
-    userDao = (UserDao) this.getServletContext().getAttribute("userDao");
+    userService = (UserService) getServletContext().getAttribute("userService");
   }
 
   /**
@@ -53,7 +55,7 @@ public class UserListServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     try {
-      List<User> list = userDao.list();
+      List<User> list = userService.list();
 
       // 콘텐트 출력은 JSP에게 맡긴다.
       // JSP를 실행하기 전에 JSP가 사용할 객체를 ServletRequest 보관소에 보관한다.

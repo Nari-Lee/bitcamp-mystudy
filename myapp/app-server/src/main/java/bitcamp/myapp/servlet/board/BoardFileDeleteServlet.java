@@ -1,6 +1,7 @@
 package bitcamp.myapp.servlet.board;
 
 import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
@@ -23,19 +24,18 @@ import java.io.IOException;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 24. 9. 9.        narilee       최초 생성
+ * 24. 9. 9.         narilee       최초 생성
+ * 24. 9. 11.        narilee       BoardService 적용
  */
 @WebServlet("/board/file/delete")
   public class BoardFileDeleteServlet extends HttpServlet {
 
-  private BoardDao boardDao;
-  private SqlSessionFactory sqlSessionFactory;
+  private BoardService boardService;
   private String uploadDir;
 
   @Override
   public void init() throws ServletException {
-    boardDao = (BoardDao) getServletContext().getAttribute("boardDao");
-    sqlSessionFactory = (SqlSessionFactory) getServletContext().getAttribute("sqlSessionFactory");
+    boardService = (BoardService) getServletContext().getAttribute("boardService");
     uploadDir = getServletContext().getRealPath("/upload/board");
   }
 
@@ -49,12 +49,12 @@ import java.io.IOException;
       }
 
       int fileNo = Integer.parseInt(req.getParameter("fileNo"));
-      AttachedFile attachedFile = boardDao.getFile(fileNo);
+      AttachedFile attachedFile = boardService.getAttachedFile(fileNo);
       if (attachedFile == null) {
         throw new Exception("없는 첨부파일입니다.");
       }
 
-      Board board = boardDao.findBy(attachedFile.getBoardNo());
+      Board board = boardService.get(attachedFile.getBoardNo());
       if (loginUser.getNo() > 10 && board.getWriter().getNo() != loginUser.getNo()) {
         throw new Exception("삭제 권한이 없습니다.");
       }
@@ -63,12 +63,10 @@ import java.io.IOException;
       if (file.exists()) {
         file.delete();
       }
-      boardDao.deleteFile(fileNo);
-      sqlSessionFactory.openSession(false).commit();
+      boardService.deleteAttachedFile(fileNo);
       res.sendRedirect("/board/view?no=" + req.getParameter("boardNo"));
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
       req.getRequestDispatcher("/error.jsp").forward(req, res);
     }

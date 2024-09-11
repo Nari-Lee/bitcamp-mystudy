@@ -1,8 +1,7 @@
 package bitcamp.myapp.servlet.board;
 
-import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.Board;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -27,13 +26,13 @@ import java.io.IOException;
  * 24. 8. 29.        narilee       Update, Delete 추가
  * 24. 8. 30.        narilee       list.jsp 적용
  * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 11.        narilee       BoardService 적용
  */
 @WebServlet("/board/view")
   public class BoardViewServlet extends HttpServlet {
 
-  /** User 엔티티에 대한 테이터 엑세스 객체입니다. */
-  private BoardDao boardDao;
-  private SqlSessionFactory sqlSessionFactory;
+  /** Board 엔티티에 대한 테이터 엑세스 객체입니다. */
+  private BoardService boardService;
 
   /**
    * 서블릿 객체를 초기화합니다.
@@ -45,8 +44,7 @@ import java.io.IOException;
   @Override
   public void init() throws ServletException {
     // 서블릿 컨테이너 ---> init(ServletConfig) ---> init() 호출합니다.
-    boardDao = (BoardDao) this.getServletContext().getAttribute("boardDao");
-    sqlSessionFactory = (SqlSessionFactory) this.getServletContext().getAttribute("sqlSessionFactory");
+    boardService = (BoardService) getServletContext().getAttribute("boardService");
   }
 
   /**
@@ -64,13 +62,11 @@ import java.io.IOException;
       throws ServletException, IOException {
     try {
       int boardNo = Integer.parseInt(req.getParameter("no"));
-      Board board = boardDao.findBy(boardNo);
+      Board board = boardService.get(boardNo);
       req.setAttribute("board", board);
 
       if (board != null) {
-        board.setViewCount(board.getViewCount() + 1);
-        boardDao.updateViewCount(board.getNo(), board.getViewCount());
-        sqlSessionFactory.openSession(false).commit();
+        boardService.increaseViewCount(board.getNo());
       }
       res.setContentType("text/html;charset=UTF-8");
       req.getRequestDispatcher("/board/view.jsp").include(req, res);

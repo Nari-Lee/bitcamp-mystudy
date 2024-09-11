@@ -1,6 +1,7 @@
 package bitcamp.myapp.servlet.board;
 
 import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
@@ -26,18 +27,17 @@ import java.io.IOException;
  * 24. 8. 29.        narilee       최초 생성
  * 24. 9. 05.        narilee       HttpServlet으로 변경
  * 24. 9. 09.        narilee       첨부파일 삭제 추가
+ * 24. 9. 11.        narilee       BoardService 적용
  */
 @WebServlet("/board/delete")
   public class BoardDeleteServlet extends HttpServlet {
 
-  private BoardDao boardDao;
-  private SqlSessionFactory sqlSessionFactory;
+  private BoardService boardService;
   private String uploadDir;
 
   @Override
   public void init() throws ServletException {
-    boardDao = (BoardDao) getServletContext().getAttribute("boardDao");
-    sqlSessionFactory = (SqlSessionFactory) getServletContext().getAttribute("sqlSessionFactory");
+    boardService = (BoardService) getServletContext().getAttribute("boardService");
     uploadDir = getServletContext().getInitParameter("uploadDir");
   }
 
@@ -47,7 +47,7 @@ import java.io.IOException;
     try {
       User loginUser = (User) req.getSession().getAttribute("loginUser");
       int boardNo = Integer.parseInt(req.getParameter("no"));
-      Board board = boardDao.findBy(boardNo);
+      Board board = boardService.get(boardNo);
 
       if (board == null) {
         throw new Exception("없는 게시글입니다.");
@@ -62,13 +62,10 @@ import java.io.IOException;
         }
       }
 
-      boardDao.deleteFiles(boardNo);
-      boardDao.delete(boardNo);
-      sqlSessionFactory.openSession(false).commit();
+      boardService.delete(boardNo);
       res.sendRedirect("/board/list");
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
       req.getRequestDispatcher("/error.jsp").forward(req, res);
     }

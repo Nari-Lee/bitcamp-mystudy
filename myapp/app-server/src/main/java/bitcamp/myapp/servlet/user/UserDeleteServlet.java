@@ -1,7 +1,6 @@
 package bitcamp.myapp.servlet.user;
 
-import bitcamp.myapp.dao.UserDao;
-import org.apache.ibatis.session.SqlSessionFactory;
+import bitcamp.myapp.service.UserService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,18 +19,17 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 11.        narilee       UserService 적용
  */
 @WebServlet("/user/delete")
 public class UserDeleteServlet extends HttpServlet {
 
-  private UserDao userDao;
-  private SqlSessionFactory sqlSessionFactory;
+  private UserService userService;
 
   @Override
   public void init() throws ServletException {
-    userDao = (UserDao) getServletContext().getAttribute("userDao");
-    sqlSessionFactory = (SqlSessionFactory) getServletContext().getAttribute("sqlSessionFactory");
+    userService = (UserService) getServletContext().getAttribute("userService");
   }
 
   @Override
@@ -40,15 +38,13 @@ public class UserDeleteServlet extends HttpServlet {
     try {
       int userNo = Integer.parseInt(req.getParameter("no"));
 
-      if (userDao.delete(userNo)) {
-        sqlSessionFactory.openSession(false).commit();
+      if (userService.delete(userNo)) {
         res.sendRedirect("/user/list");
       } else {
         throw new Exception("없는 회원입니다.");
       }
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
       req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
