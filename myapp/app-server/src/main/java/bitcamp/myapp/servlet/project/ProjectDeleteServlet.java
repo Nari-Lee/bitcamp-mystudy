@@ -1,7 +1,6 @@
 package bitcamp.myapp.servlet.project;
 
-import bitcamp.myapp.dao.ProjectDao;
-import org.apache.ibatis.session.SqlSessionFactory;
+import bitcamp.myapp.service.ProjectService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,16 +19,16 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 11.        narilee       projectService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
+ *
  */
 @WebServlet("/project/delete")
 public class ProjectDeleteServlet extends HttpServlet {
 
   /** Project 엔티티에 대한 데이터 액세스 객체입니다. */
-  private ProjectDao projectDao;
-
-  /** 데이터베이스 세션을 괸라하는 SqlSessionFactory 객체입니다. */
-  private SqlSessionFactory sqlSessionFactory;
+  private ProjectService projectService;
 
   /**
    * 서블릿 객체를 초기화합니다. 이 메서드는 서블릿이 배치될 때 서블릿 컨테이너에 의헤 호출됩니다. ProjectDao와 SqlSessionFactory 객체를
@@ -39,9 +38,7 @@ public class ProjectDeleteServlet extends HttpServlet {
    */
   @Override
   public void init() throws ServletException {
-    this.projectDao = (ProjectDao) this.getServletContext().getAttribute("projectDao");
-    this.sqlSessionFactory =
-        (SqlSessionFactory) this.getServletContext().getAttribute("sqlSessionFactory");
+    projectService = (ProjectService) getServletContext().getAttribute("projectService");
   }
 
   @Override
@@ -50,18 +47,14 @@ public class ProjectDeleteServlet extends HttpServlet {
     try {
       int projectNo = Integer.parseInt(req.getParameter("no"));
 
-      projectDao.deleteMembers(projectNo);
-      if (projectDao.delete(projectNo)) {
-        sqlSessionFactory.openSession(false).commit();
-        res.sendRedirect("/project/list");
+      if (projectService.delete(projectNo)) {
+        req.setAttribute("viewName", "redirect:list");
       } else {
         throw new Exception("없는 프로젝트입니다.");
       }
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

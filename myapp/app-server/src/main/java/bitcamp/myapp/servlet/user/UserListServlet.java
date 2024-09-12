@@ -60,18 +60,10 @@ public class UserListServlet extends HttpServlet {
       // 콘텐트 출력은 JSP에게 맡긴다.
       // JSP를 실행하기 전에 JSP가 사용할 객체를 ServletRequest 보관소에 보관한다.
       req.setAttribute("list", list);
-
-      // 출력한 콘텐트의 타입을 먼저 지정한 후 출력 스트림을 얻는다.
-      // text/plain -> 텍스트 대로 출력
-      // text/html -> html 렌더링
-      // 기타 -> 다운로드창 출력
-      // 콘텐트 타입은 include() 호출 전에 실행해야 한다.
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/user/list.jsp").include(req, res);
+      req.setAttribute("viewName", "/user/list.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

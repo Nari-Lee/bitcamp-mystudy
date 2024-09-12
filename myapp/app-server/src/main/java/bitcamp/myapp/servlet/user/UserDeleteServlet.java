@@ -21,6 +21,7 @@ import java.io.IOException;
  * 24. 8. 29.        narilee       최초 생성
  * 24. 9. 05.        narilee       HttpServlet으로 변경
  * 24. 9. 11.        narilee       UserService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/user/delete")
 public class UserDeleteServlet extends HttpServlet {
@@ -39,14 +40,13 @@ public class UserDeleteServlet extends HttpServlet {
       int userNo = Integer.parseInt(req.getParameter("no"));
 
       if (userService.delete(userNo)) {
-        res.sendRedirect("/user/list");
+        req.setAttribute("viewName", "redirect:list");
       } else {
         throw new Exception("없는 회원입니다.");
       }
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

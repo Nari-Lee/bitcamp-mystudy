@@ -1,29 +1,31 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page
-    language="java"
-    contentType="text/html;charset=UTF-8"
-    pageEncoding="UTF-8"
-    trimDirectiveWhitespaces="true"%>
-
+        language="java"
+        contentType="text/html;charset=UTF-8"
+        pageEncoding="UTF-8"
+        trimDirectiveWhitespaces="true"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <jsp:include page="/header.jsp"/>
 
 <h1>회원 목록</h1>
-<p><a href='/user/add'>새 회원</a></p>
+<p><a href='add'>새 회원</a></p>
 <table>
   <thead>
-    <tr><th>번호</th><th>이름</th><th>이메일</th></tr>
+  <tr><th>번호</th><th>이름</th><th>이메일</th></tr>
   </thead>
-<tbody>
-<c:forEach items="${list}" var="user">
-<tr>
-  <td>${user.no}</td>
-  <td><a href='/user/view?no=${user.no}'>${user.name}</a></td>
-  <td>%{user.email}</td>
-</tr>
+  <tbody>
+
+  <c:forEach items="${list}" var="user">
+    <tr>
+      <td>${user.no}</td>
+      <td><a href='view?no=${user.no}'>${user.name}</a></td>
+      <td>${user.email}</td>
+    </tr>
   </c:forEach>
-</tbody>
+
+  </tbody>
 </table>
+
 
 </body>
 </html>

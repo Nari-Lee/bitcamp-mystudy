@@ -1,12 +1,14 @@
 package bitcamp.myapp.servlet.auth;
 
-import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Objects;
 
 /**
  * packageName    : bitcamp.myapp.servlet.auth
@@ -19,12 +21,13 @@ import java.io.IOException;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
+ * 24. 9. 11.        narilee       service 적용
  */
 @WebServlet("/auth/login")
 public class LoginServlet extends HttpServlet {
 
   /** User 엔티티에 대한 테이터 엑세스 객체입니다. */
-  private UserDao userDao;
+  private UserService userService;
 
   /**
    * 서블릿 객체를 초기화합니다.
@@ -36,14 +39,13 @@ public class LoginServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     // 서블릿 컨테이너 ---> init(ServletConfig) ---> init() 호출합니다.
-    userDao = (UserDao) this.getServletContext().getAttribute("userDao");
+    userService = (UserService) getServletContext().getAttribute("userService");
   }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
-    res.setContentType("text/html;charset=UTF-8");
-    req.getRequestDispatcher("/auth/form.jsp").include(req, res);
+    req.setAttribute("viewName", "/auth/form.jsp");
   }
 
   /**
@@ -65,22 +67,21 @@ public class LoginServlet extends HttpServlet {
       String email = req.getParameter("email");
       String password = req.getParameter("password");
 
-      User user = userDao.findByEmailAndPassword(email, password);
+      User user = userService.exits(email, password);
       if (user == null) {
-        res.setHeader("Refresh", "1;url=/auth/form");
-       res.setContentType("text/html;charset=UTF-8");
-        req.getRequestDispatcher("/auth/fail.jsp").include(req, res);
+        req.setAttribute("refresh", "2; url=login");
+        req.setAttribute("viewName", "/auth/fail.jsp");
         return;
       }
 
       if (req.getParameter("saveEmail") != null) {
         Cookie cookie = new Cookie("email", email);
         cookie.setMaxAge(60 * 60 * 24 * 7);
-        res.addCookie(cookie);
+        req.setAttribute("email", cookie);
       } else {
         Cookie cookie = new Cookie("email", "test@test.com");
         cookie.setMaxAge(0);
-        res.addCookie(cookie);
+        req.setAttribute("email", cookie);
       }
 
       /**
@@ -88,7 +89,7 @@ public class LoginServlet extends HttpServlet {
        * 파라미터로 ServletRequest 받은 객체를 원래 타입으로 형변환 해야 합니다.
        * 즉 req 레퍼런스는 실제 HttpServletRequest 객체를 가리키고 있습니다.
       */
-      HttpServletRequest httpReq = (HttpServletRequest) req;
+      HttpServletRequest httpReq = req;
       /**
        * 클라이언트 전용 보관소를 알아냅니다.
       */
@@ -97,10 +98,9 @@ public class LoginServlet extends HttpServlet {
        * 클라이언트 전용 보관소에 로그인 사용자 정보를 보관합니다.
        */
       session.setAttribute("loginUser", user);
-      res.sendRedirect("/");
+      req.setAttribute("viewName", "redirect:/");
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

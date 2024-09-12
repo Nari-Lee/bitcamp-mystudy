@@ -27,6 +27,7 @@ import java.util.List;
  * 24. 8. 30.        narilee       list.jsp 적용
  * 24. 9. 05.        narilee       HttpServlet으로 변경
  * 24. 9. 11.        narilee       BoardService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/board/list")
 public class BoardListServlet extends HttpServlet {
@@ -60,13 +61,10 @@ public class BoardListServlet extends HttpServlet {
       List<Board> list = boardService.list();
 
       req.setAttribute("list", list);
-
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/board/list.jsp").include(req, res);
+      req.setAttribute("viewName", "/board/list.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

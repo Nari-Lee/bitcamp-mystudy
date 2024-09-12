@@ -1,11 +1,9 @@
 package bitcamp.myapp.servlet.board;
 
-import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.MultipartConfig;
@@ -34,8 +32,8 @@ import java.util.UUID;
  * 24. 9. 05.        narilee       HttpServlet으로 변경
  * 24. 9. 09.        narilee       UTF-8 필터 적용, 첨부파일 적용
  * 24. 9. 11.        narilee       BoardService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
-@MultipartConfig(maxFileSize = 1024 * 1024 * 60, maxRequestSize = 1024 * 1024 * 100)
 @WebServlet("/board/add")
   public class BoardAddServlet extends HttpServlet {
 
@@ -106,12 +104,9 @@ import java.util.UUID;
       board.setAttachedFiles(attachedFiles);
 
       boardService.add(board);
-
-      res.sendRedirect("/board/list");
-
+      req.setAttribute("viewName", "redirect:list");
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 

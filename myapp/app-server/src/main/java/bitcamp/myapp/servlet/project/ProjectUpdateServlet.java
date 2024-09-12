@@ -1,9 +1,8 @@
 package bitcamp.myapp.servlet.project;
 
-import bitcamp.myapp.dao.ProjectDao;
+import bitcamp.myapp.service.ProjectService;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
@@ -24,18 +23,15 @@ import java.util.ArrayList;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 29.        narilee       최초 생성
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
  * 24. 9. 09.        narileel      UTF-8 필터 적용
+ * 24. 9. 11.        narilee       projectService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/project/update")
   public class ProjectUpdateServlet extends HttpServlet {
 
-  /** Project 엔티티에 대한 데이터 액세스 객체입니다. */
-  private ProjectDao projectDao;
-
-  /** 데이터베이스 세션을 괸라하는 SqlSessionFactory 객체입니다. */
-  private SqlSessionFactory sqlSessionFactory;
-
+  private ProjectService projectService;
   /**
    * 서블릿 객체를 초기화합니다.
    * 이 메서드는 서블릿이 배치될 때 서블릿 컨테이너에 의헤 호출됩니다.
@@ -45,8 +41,7 @@ import java.util.ArrayList;
    */
   @Override
   public void init() throws ServletException {
-    this.projectDao = (ProjectDao) this.getServletContext().getAttribute("projectDao");
-    this.sqlSessionFactory = (SqlSessionFactory) this.getServletContext().getAttribute("sqlSessionFactory");
+    projectService = (ProjectService) getServletContext().getAttribute("projectService");
   }
 
   @Override
@@ -70,21 +65,13 @@ import java.util.ArrayList;
         project.setMembers(members);
       }
 
-      if (!projectDao.update(project)) {
+      if (!projectService.update(project)) {
         throw new Exception("없는 프로젝트입니다!");
       }
-
-      projectDao.deleteMembers(project.getNo());
-      if (project.getMembers() != null && project.getMembers().size() > 0) {
-        projectDao.insertMembers(project.getNo(), project.getMembers());
-      }
-      sqlSessionFactory.openSession(false).commit();
-      res.sendRedirect("/project/list");
+      req.setAttribute("viewName", "redirect:list");
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

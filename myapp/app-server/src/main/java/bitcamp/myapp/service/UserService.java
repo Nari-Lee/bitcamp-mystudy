@@ -29,4 +29,5 @@ public interface UserService {
 
   boolean delete(int userNo) throws Exception;
 
-  }
+  User exits(String email, String password) throws Exception;
+}

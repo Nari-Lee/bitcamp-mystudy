@@ -72,4 +72,9 @@ public class DefaultUserService implements UserService {
       throw e;
     }
   }
+
+  @Override
+  public User exits(String email, String password) throws Exception {
+    return userDao.findByEmailAndPassword(email, password);
+  }
 }

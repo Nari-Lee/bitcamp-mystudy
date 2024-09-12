@@ -1,7 +1,7 @@
 package bitcamp.myapp.servlet.project;
 
-import bitcamp.myapp.dao.ProjectDao;
-import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.ProjectService;
+import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
 
@@ -26,17 +26,15 @@ import java.util.List;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 11.        narilee       projectService, userService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/project/view")
 public class ProjectViewServlet extends HttpServlet {
 
-  /** Project 엔티티에 대한 테이터 엑세스 객체입니다. */
-  private ProjectDao projectDao;
-
-  /** User 엔티티에 대한 데이터 액세스 객체입니다. */
-  private UserDao userDao;
-
+  private ProjectService projectService;
+  private UserService userService;
   /**
    * 서블릿 객체르 초기화합니다.
    * 이 메서드는 서블릿이 배치될 때 서블릿 컨테이너에 의해 호출됩니다.
@@ -46,8 +44,7 @@ public class ProjectViewServlet extends HttpServlet {
    */
   @Override
   public void init() throws ServletException {
-    projectDao = (ProjectDao) getServletContext().getAttribute("projectDao");
-    userDao = (UserDao) getServletContext().getAttribute("userDao");
+    projectService = (ProjectService) getServletContext().getAttribute("projectService");
   }
 
 /**
@@ -66,18 +63,15 @@ public class ProjectViewServlet extends HttpServlet {
 
     try {
       int projectNo = Integer.parseInt(req.getParameter("no"));
-      Project project = projectDao.findBy(projectNo);
+      Project project = projectService.get(projectNo);
       req.setAttribute("project", project);
 
-      List<User> users = userDao.list();
+      List<User> users = userService.list();
       req.setAttribute("users", users);
-
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/project/view.jsp").include(req, res);
+      req.setAttribute("viewName", "/project/view.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

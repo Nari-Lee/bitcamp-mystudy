@@ -1,10 +1,7 @@
 package bitcamp.myapp.servlet.project;
 
-import bitcamp.myapp.dao.ProjectDao;
-import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.ProjectService;
 import bitcamp.myapp.vo.Project;
-import bitcamp.myapp.vo.User;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
@@ -12,9 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * packageName    : bitcamp.myapp.servlet.project
@@ -28,17 +22,16 @@ import java.util.List;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
- * 24. 9. 05         narilee       HttpServlet으로 변경
- * 24. 9. 09.        narileel      UTF-8 필터 적용, 첨부파일 추가
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 09.        narilee       UTF-8 필터 적용, 첨부파일 추가
+ * 24. 9. 11.        narilee       projectService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/project/add")
 public class ProjectAddServlet extends HttpServlet {
 
   /** Project 엔티티에 대한 데이터 액세스 객체입니다. */
-  private ProjectDao projectDao;
-
-  /** 데이터베이스 세션을 괸라하는 SqlSessionFactory 객체입니다. */
-  private SqlSessionFactory sqlSessionFactory;
+  private ProjectService projectService;
 
   /**
    * 서블릿 객체를 초기화합니다.
@@ -49,9 +42,7 @@ public class ProjectAddServlet extends HttpServlet {
    */
   @Override
   public void init() throws ServletException {
-    ServletContext ctx = getServletContext();
-    this.projectDao = (ProjectDao) ctx.getAttribute("projectDao");
-    this.sqlSessionFactory = (SqlSessionFactory) ctx.getAttribute("sqlSessionFactory");
+    projectService = (ProjectService) getServletContext().getAttribute("projectService");
   }
 
   /**
@@ -72,21 +63,13 @@ public class ProjectAddServlet extends HttpServlet {
 
     try {
       Project project = (Project) req.getSession().getAttribute("project");
-      projectDao.insert(project);
-
-      if (project.getMembers() != null && project.getMembers().size() > 0) {
-        projectDao.insertMembers(project.getNo(), project.getMembers());
-      }
-      sqlSessionFactory.openSession(false).commit();
-      res.sendRedirect("/project/list");
-
+      projectService.add(project);
       // 세션에 임시 보간했던 Project 객치를 제거한다.
       req.getSession().removeAttribute("project");
+      req.setAttribute("viewName", "redirect:list");
 
     } catch (Exception e) {
-      sqlSessionFactory.openSession(false).rollback();
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

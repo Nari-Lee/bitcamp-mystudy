@@ -1,6 +1,6 @@
 package bitcamp.myapp.servlet.project;
 
-import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
 
@@ -9,10 +9,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * packageName    : bitcamp.myapp.servlet.project
@@ -26,15 +24,17 @@ import java.util.List;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 9. 06.        narilee       최초 생성
+ * 24. 9. 11.        narilee       userService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/project/form3")
 public class ProjectForm3Servlet extends HttpServlet {
 
-  private UserDao userDao;
+  private UserService userService;
 
   @Override
   public void init() throws ServletException {
-    this.userDao = (UserDao) getServletContext().getAttribute("userDao");
+    userService = (UserService) getServletContext().getAttribute("userService");
   }
 
   @Override
@@ -47,18 +47,16 @@ public class ProjectForm3Servlet extends HttpServlet {
       if (memberNos != null) {
         ArrayList<User> members = new ArrayList<>();
         for (String memberNo : memberNos) {
-          User user = userDao.findBy(Integer.parseInt(memberNo));
+          User user = userService.get(Integer.parseInt(memberNo));
           members.add(user);
         }
         project.setMembers(members);
       }
 
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/project/form3.jsp").include(req, res);
+      req.setAttribute("project", "/project/form3.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

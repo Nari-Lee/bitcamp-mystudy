@@ -28,6 +28,7 @@ import java.io.IOException;
  * 24. 8. 30.        narilee       list.jsp 적용
  * 24. 9. 05         narilee       HttpServlet으로 변경
  * 24. 9. 11.        narilee       UserService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/user/view")
 public class UserViewServlet extends HttpServlet {
@@ -62,13 +63,10 @@ public class UserViewServlet extends HttpServlet {
       int userNo = Integer.parseInt(req.getParameter("no"));
       User user = userService.get(userNo);
       req.setAttribute("user", user);
-
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/user/view.jsp").forward(req, res);
+      req.setAttribute("viewName", "/user/view.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

@@ -17,7 +17,7 @@
 </c:if>
 
 <c:if test="${not empty board}">
-<form action='/board/update' method="post" enctype="multipart/form-data">
+<form action='update' method="post" enctype="multipart/form-data">
   번호: <input readonly name='no' type='text' value='${board.no}'><br>
   제목: <input name='title' type='text' value='${board.title}'><br>
   내용: <textarea name='content'>${board.content}</textarea><br>
@@ -38,7 +38,7 @@
   </c:if>
   <input name="files" type="file" multiple><br>
   <button>변경</button>
-  <button type='button' onclick='location.href="/board/delete?no=${board.no}"'>삭제</button>
+  <button type='button' onclick='location.href="delete?no=${board.no}"'>삭제</button>
 </form>
   </c:if>
 

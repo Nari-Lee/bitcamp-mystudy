@@ -1,6 +1,6 @@
 package bitcamp.myapp.servlet.project;
 
-import bitcamp.myapp.dao.ProjectDao;
+import bitcamp.myapp.service.ProjectService;
 import bitcamp.myapp.vo.Project;
 
 import javax.servlet.*;
@@ -24,12 +24,14 @@ import java.util.List;
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
  * 24. 8. 30.        narilee       list.jsp 적용
- * 24. 9. 05         narilee       HttpServlet으로 변경
+ * 24. 9. 05.        narilee       HttpServlet으로 변경
+ * 24. 9. 11.        narilee       projectService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/project/list")
 public class ProjectListServlet extends HttpServlet {
 
-  private ProjectDao projectDao;
+  private ProjectService projectService;
 
   /**
    * 서블릿 객체를 생성한 후 바로 호출됩니다.
@@ -37,7 +39,7 @@ public class ProjectListServlet extends HttpServlet {
    */
   @Override
   public void init() {
-    projectDao = (ProjectDao) this.getServletContext().getAttribute("projectDao");
+    projectService = (ProjectService) getServletContext().getAttribute("projectService");
   }
 
   /**
@@ -55,16 +57,12 @@ public class ProjectListServlet extends HttpServlet {
       throws ServletException, IOException {
 
     try {
-      List<Project> list = projectDao.list();
-
+      List<Project> list = projectService.list();
       req.setAttribute("list", list);
-
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/project/list.jsp").include(req, res);
+      req.setAttribute("viewName", "/project/list.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

@@ -1,12 +1,9 @@
 package bitcamp.myapp.servlet.project;
 
-import bitcamp.myapp.dao.ProjectDao;
-import bitcamp.myapp.dao.UserDao;
+import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
-import org.apache.ibatis.session.SqlSessionFactory;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -29,15 +26,17 @@ import java.util.List;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 9. 06.        narilee       최초 생성
+ * 24. 9. 11.        narilee       userService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/project/form2")
 public class ProjectForm2Servlet extends HttpServlet {
 
-  private UserDao userDao;
+  private UserService userService;
 
   @Override
   public void init() throws ServletException {
-    this.userDao = (UserDao) this.getServletContext().getAttribute("userDao");
+    userService = (UserService) getServletContext().getAttribute("userService");
   }
 
   @Override
@@ -55,15 +54,12 @@ public class ProjectForm2Servlet extends HttpServlet {
     HttpSession session = req.getSession();
     session.setAttribute("project", project);
 
-    List<User> users = userDao.list();
+    List<User> users = userService.list();
     req.setAttribute("users", users);
-
-    res.setContentType("text/html;charset=UTF-8");
-    req.getRequestDispatcher("/project/form2.jsp").include(req, res);
+    req.setAttribute("viewName", "/project/form2.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }

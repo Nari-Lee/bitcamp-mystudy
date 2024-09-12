@@ -44,7 +44,7 @@ public class DownloadServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
     try {
-      User loginUser = (User) ((HttpServletRequest) req).getSession().getAttribute("loginUser");
+      User loginUser = (User) req.getSession().getAttribute("loginUser");
       if (loginUser == null) {
         throw new Exception("로그인 하지 않았습니다.");
       }
@@ -71,7 +71,6 @@ public class DownloadServlet extends HttpServlet {
         }
 
         downloadFileIn.close();
-
 
       } else if (path.equals("user")) {
 

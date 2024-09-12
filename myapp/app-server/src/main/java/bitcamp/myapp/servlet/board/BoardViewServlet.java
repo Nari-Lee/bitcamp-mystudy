@@ -27,6 +27,7 @@ import java.io.IOException;
  * 24. 8. 30.        narilee       list.jsp 적용
  * 24. 9. 05         narilee       HttpServlet으로 변경
  * 24. 9. 11.        narilee       BoardService 적용
+ * 24. 9. 12.        narilee       DispatcherServlet 적용
  */
 @WebServlet("/board/view")
   public class BoardViewServlet extends HttpServlet {
@@ -68,12 +69,10 @@ import java.io.IOException;
       if (board != null) {
         boardService.increaseViewCount(board.getNo());
       }
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/board/view.jsp").include(req, res);
+      req.setAttribute("viewName", "/board/view.jsp");
 
     } catch (Exception e) {
       req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
 }
