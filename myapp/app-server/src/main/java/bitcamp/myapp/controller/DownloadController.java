@@ -1,4 +1,4 @@
-package bitcamp.myapp.servlet;
+package bitcamp.myapp.controller;
 
 import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.vo.AttachedFile;
@@ -28,7 +28,7 @@ import java.util.Map;
  * 24. 9. 9.        narilee       최초 생성
  */
 @WebServlet("/download")
-public class DownloadServlet extends HttpServlet {
+public class DownloadController extends HttpServlet {
 
   private BoardDao boardDao;
   private Map<String, String> downloadPathMap = new HashMap<>();
@@ -77,7 +77,6 @@ public class DownloadServlet extends HttpServlet {
       } else {
 
       }
-
       res.setContentType("text/html;charset=UTF-8");
       req.getRequestDispatcher("/board/form.jsp").include(req, res);
 

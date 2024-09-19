@@ -1,5 +1,9 @@
 package bitcamp.myapp.listener;
 
+import bitcamp.myapp.controller.AuthController;
+import bitcamp.myapp.controller.BoardController;
+import bitcamp.myapp.controller.ProjectController;
+import bitcamp.myapp.controller.UserController;
 import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.dao.DaoFactory;
 import bitcamp.myapp.dao.ProjectDao;
@@ -15,6 +19,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import java.io.InputStream;
+import java.util.*;
 
 /**
  * packageName    : bitcamp.myapp.listener
@@ -28,6 +33,7 @@ import java.io.InputStream;
  * -----------------------------------------------------------
  * 24. 8. 27.        narilee       최초 생성
  * 24. 9. 11.        narilee       dao에서 service로 변경
+ * 24. 9. 13.        narilee       ControllerMap 추가
  */
 @WebListener // 서블릿 컨테이너에 이 클래스를 배치하는 태그입니다.
 public class ContextLoaderListener implements ServletContextListener {
@@ -64,9 +70,15 @@ public class ContextLoaderListener implements ServletContextListener {
       // ServletContext에 객체 저장
       ServletContext ctx = sce.getServletContext();
       ctx.setAttribute("sqlSessionFactory", sqlSessionFactoryProxy);
-      ctx.setAttribute("userService", userService);
-      ctx.setAttribute("boardService", boardService);
-      ctx.setAttribute("projectService", projectService);
+
+      List<Object> controllers = new ArrayList<>();
+      controllers.add(new UserController(userService));
+      controllers.add(new ProjectController(projectService, userService));
+      controllers.add(new AuthController(userService));
+      controllers.add(new BoardController(boardService, ctx));
+      controllers.add(new DownloadController(boardService, ctx));
+
+      ctx.setAttribute("controllers", controllers);
 
     } catch (Exception e) {
       System.out.println("서비스 객체 준비 중 오류 발생!");
