@@ -74,7 +74,7 @@ public class DefaultUserService implements UserService {
   }
 
   @Override
-  public User exits(String email, String password) throws Exception {
+  public User exists(String email, String password) throws Exception {
     return userDao.findByEmailAndPassword(email, password);
   }
 }

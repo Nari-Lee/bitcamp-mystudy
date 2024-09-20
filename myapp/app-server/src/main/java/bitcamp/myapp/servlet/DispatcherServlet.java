@@ -1,20 +1,19 @@
 package bitcamp.myapp.servlet;
 
 import bitcamp.myapp.annotation.RequestMapping;
+import bitcamp.myapp.annotation.RequestParam;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * packageName    : bitcamp.myapp.servlet
@@ -64,18 +63,27 @@ public class DispatcherServlet extends HttpServlet {
         }
       }
 
-      if (pageController == null) ㅊ{
+      if (pageController == null) {
         throw new Exception("해당 URL을 처리할 수 없습니다.");
       }
 
-      Object[] arguments = prepareRequestHandlerArguments(requestHandler, req, res);
-      String viewName = (String) requestHandler.invoke(pageController, req, res);
+      Map<String, Object> map = new HashMap<>();
+
+      Object[] arguments = prepareRequestHandlerArguments(requestHandler, req, res, map);
+
+      if (requestHandler.getReturnType() == void.class) {
+        requestHandler.invoke(pageController, arguments);
+        return;
+      }
+
+      String viewName = (String) requestHandler.invoke(pageController, arguments);
+
+      if (map.size() > 0) {
+        copyMapToServletRequest(map, req);
+      }
 
       // 페이지 컨트롤러가 정상적으로 실행했으면, viewName을 가져와서 포워딩 한다.
-      if (viewName == null) {
-        return;
-
-      } else if (viewName.startsWith("redirect:")) {
+      if (viewName.startsWith("redirect:")) {
         res.sendRedirect(viewName.substring(9));
 
       } else {
@@ -89,8 +97,8 @@ public class DispatcherServlet extends HttpServlet {
   }
 
   private Object[] prepareRequestHandlerArguments(Method requestHandler, HttpServletRequest req,
-      HttpServletResponse res) {
-    // 메서드의 파라미터 분석
+      HttpServletResponse res, Map<String, Object> requestAttributesMap) throws Exception {
+
     Parameter[] params = requestHandler.getParameters();
     ArrayList<Object> args = new ArrayList<>();
 
@@ -100,8 +108,125 @@ public class DispatcherServlet extends HttpServlet {
        args.add(req);
      } else if (paramType == ServletResponse.class || paramType == HttpServletResponse.class) {
        args.add(res);
+     } else if (paramType == HttpSession.class) {
+       args.add(req.getSession());
+     } else if (paramType == Map.class) {
+       args.add(requestAttributesMap);
+     } else if (paramType.isPrimitive() ||
+             paramType == String.class ||
+             paramType == java.util.Date.class ||
+             paramType == java.sql.Date.class ||
+             paramType == int[].class) {
+       RequestParam paramAnno = param.getAnnotation(RequestParam.class);
+       args.add(getDefaultTypeValueOrStringFromRequestParameter(
+           req, // 클라이언트가 보낸 값이 저장된 ServletRequest 보관소
+           param.getType(), // ServletRequest 보관소에서 꺼낸 값을 형변환할 떼 타입
+           paramAnno.value() // ServletRequest 보관서에서 꺼낼 값의 파라미터명
+       ));
+     } else if (paramType == Part.class || paramType == Part[].class) {
+       RequestParam paramAnno = param.getAnnotation(RequestParam.class);
+       args.add(req.getPart(paramAnno.value()));
+     } else if (paramType == Part[].class) {
+       RequestParam paramAnno = param.getAnnotation(RequestParam.class);
+       args.add(getPartArray(req, paramAnno.value()));
+     } else {
+       args.add(createDomainObject(req, param.getType()));
      }
+    }
+    return args.toArray();
+  }
+
+  private Part[] getPartArray(HttpServletRequest req, String paramName) throws Exception {
+    Collection<Part> parts = req.getParts();
+    ArrayList<Part> list = new ArrayList<>();
+    for (Part part : parts) {
+      if (part.getName().equals(paramName)) {
+        continue;
+      }
+      list.add(part);
+    }
+    return list.toArray(new Part[0]);
+  }
+
+  private Object createDomainObject(HttpServletRequest req, Class<?> paramType) throws Exception {
+    // 요청핸들러가 원하는 파라미터 객체를 생성한다.
+    Object domainObject = paramType.getConstructor().newInstance();
+
+    // 도메인 객체의 setter 메서드를 호출하여 클라이언트가 보낸 값을 보관한다.
+    Method[] methods = paramType.getDeclaredMethods();
+    for (Method m : methods) {
+      if (Modifier.isPublic(m.getModifiers()) || m.getName().startsWith("set")) {
+        continue;
+      }
+
+      Class<?> propertyType = m.getParameterTypes()[0]; // setter 메서드에 파라미터가 무조건 한개 있다고 가정한다.
+      String propertyName = Character.toLowerCase(m.getName().charAt(3)) + m.getName().substring(4);
+
+      // setter 메서트의 이름(프로퍼티명)과 일치하는 값을 클라이언트가 보낸 값
+      Object value = getDefaultTypeValueOrStringFromRequestParameter(req, propertyType, propertyName);
+      if (value == null) {
+        continue;
+      }
+      // setter 메서드에 넣을 값이 클라이언트가 보낸 파라미터에 있으면 객체에 보관한다.
+      m.invoke(domainObject, value);
+    }
+    // 클라이언트가 보낸 값을 보관한 도메인 객체를 리턴한다.
+    return domainObject;
+  }
+
+  private void copyMapToServletRequest(Map<String, Object> requestAttributesMap, ServletRequest req) {
+    for (Map.Entry<String, Object> entry : requestAttributesMap.entrySet()) {
+      req.setAttribute(entry.getKey(), entry.getValue());
     }
   }
 
+  // 클라이언트가 보낸 값들 중에서 paramName에 해당하는 값을 꺼낸다.
+  private Object getDefaultTypeValueOrStringFromRequestParameter(HttpServletRequest req, Class<?> paramType, String paramName) {
+    String paramValue = req.getParameter(paramName);
+    if (paramType != boolean.class && paramType.getComponentType() == null && paramValue == null) {
+      return null;
+    }
+
+    paramType.getComponentType();
+
+    if (paramType == byte.class) {
+      return Byte.parseByte(paramValue);
+    } else if (paramType == short.class) {
+      return Short.parseShort(paramValue);
+    } else if (paramType == int.class) {
+      return Integer.parseInt(paramValue);
+    } else if (paramType == int[].class) {
+      String[] paramValues = req.getParameterValues(paramName);
+      if (paramValues == null) {
+        return new int[0];
+      }
+
+      int[] values = new int[paramValues.length];
+      for (int i = 0; i < paramValues.length; i++) {
+        values[i] = Integer.parseInt(paramValues[i]);
+      }
+      return values;
+    } else if (paramType == long.class) {
+      return Long.parseLong(paramValue);
+    } else if (paramType == float.class) {
+      return Float.parseFloat(paramValue);
+    } else if (paramType == double.class) {
+      return Double.parseDouble(paramValue);
+    } else if (paramType == char.class) {
+      return paramValue.charAt(0);
+    } else if (paramType == boolean.class) {
+      if (paramValue == null ||
+          paramValue.equals("0") ||
+          paramValue.equals("false") ||
+          paramValue.equals("off") ||
+          paramValue.equals("no")) {
+        return false;
+      }
+      return true;
+    } else if (paramType == java.util.Date.class || paramType == java.sql.Date.class) {
+      return java.sql.Date.valueOf(paramValue);
+    } else {
+      return paramValue;
+    }
+  }
 }

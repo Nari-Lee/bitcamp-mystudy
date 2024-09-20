@@ -1,14 +1,19 @@
 package bitcamp.myapp.controller;
 
+import bitcamp.myapp.annotation.RequestMapping;
+import bitcamp.myapp.annotation.RequestParam;
 import bitcamp.myapp.dao.BoardDao;
+import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.User;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,62 +32,57 @@ import java.util.Map;
  * -----------------------------------------------------------
  * 24. 9. 9.        narilee       최초 생성
  */
-@WebServlet("/download")
-public class DownloadController extends HttpServlet {
+public class DownloadController {
 
-  private BoardDao boardDao;
+  private BoardService boardService;
   private Map<String, String> downloadPathMap = new HashMap<>();
 
-  @Override
-  public void init() throws ServletException {
-    this.boardDao = (BoardDao) this.getServletContext().getAttribute("boardDao");
-    this.downloadPathMap.put("board", this.getServletContext().getRealPath("/upload/board"));
-    this.downloadPathMap.put("user", this.getServletContext().getRealPath("/upload/user"));
-    this.downloadPathMap.put("project", this.getServletContext().getRealPath("/upload/project"));
+  public DownloadController(BoardService boardService, ServletContext ctx) {
+    this.boardService = boardService;
+    this.downloadPathMap.put("board", ctx.getRealPath("/upload/board"));
+    this.downloadPathMap.put("user", ctx.getRealPath("/upload/user"));
+    this.downloadPathMap.put("project", ctx.getRealPath("/upload/project"));
   }
 
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-    try {
-      User loginUser = (User) req.getSession().getAttribute("loginUser");
-      if (loginUser == null) {
-        throw new Exception("로그인 하지 않았습니다.");
+  @RequestMapping("/download")
+  public void download(@RequestParam("path") String path,
+      @RequestParam("fileNo") int fileNo,
+      HttpSession session,
+      HttpServletResponse res) throws Exception {
+
+    User loginUser = (User) session.getAttribute("loginUser");
+
+    if (loginUser == null) {
+      throw new Exception("로그인 하지 않았습니다.");
+    }
+
+    String downloadDir = downloadPathMap.get(path);
+
+    if (path.equals("board")) {
+      AttachedFile attachedFile = boardService.getAttachedFile(fileNo);
+
+      res.setHeader(
+          "Content-Disposition",
+          String.format("attachment; filename=\"%s\"", attachedFile.getOriginFilename())
+      );
+
+      BufferedInputStream downloadFileIn = new BufferedInputStream(
+          new FileInputStream(downloadDir + "/" + attachedFile.getFilename()));
+      OutputStream out = res.getOutputStream();
+
+      int b;
+      while ((b = downloadFileIn.read()) != -1) {
+        out.write(b);
       }
 
-      String path = req.getParameter("path");
-      String downloadDir = downloadPathMap.get(path);
+      downloadFileIn.close();
 
-      if (path.equals("board")) {
-        int fileNo = Integer.parseInt(req.getParameter("fileNo"));
-        AttachedFile attachedFile = boardDao.getFile(fileNo);
 
-        res.setHeader(
-            "Content-Disposition",
-            String.format("attachment; filename=\"%s\"", attachedFile.getOriginFilename())
-        );
+    } else if (path.equals("user")) {
 
-        BufferedInputStream downloadFileIn = new BufferedInputStream(
-            new FileInputStream(downloadDir + "/" + attachedFile.getFilename()));
-        OutputStream out = res.getOutputStream();
+    } else {
 
-        int b;
-        while ((b = downloadFileIn.read()) != -1) {
-          out.write(b);
-        }
-
-        downloadFileIn.close();
-
-      } else if (path.equals("user")) {
-
-      } else {
-
-      }
-      res.setContentType("text/html;charset=UTF-8");
-      req.getRequestDispatcher("/board/form.jsp").include(req, res);
-
-    } catch (Exception e) {
-      req.setAttribute("exception", e);
-      req.getRequestDispatcher("/error.jsp").forward(req, res);
     }
   }
+
 }
