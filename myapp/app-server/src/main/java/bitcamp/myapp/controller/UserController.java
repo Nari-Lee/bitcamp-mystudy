@@ -1,12 +1,11 @@
 package bitcamp.myapp.controller;
 
+import bitcamp.myapp.annotation.Controller;
 import bitcamp.myapp.annotation.RequestMapping;
 import bitcamp.myapp.annotation.RequestParam;
 import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.User;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,9 @@ import java.util.Map;
  * 24. 9. 12.        narilee       DispatcherServlet 적용
  * 24. 9. 13.        narilee       Servlet을 Controller로 전환후 통합
  * 24. 9. 19.        narilee       HttpServletResponse 삭제, Param 변경
+ * 24. 9. 23.        narilee       @Controller 적용
  */
+@Controller
 public class UserController {
 
   private UserService userService;

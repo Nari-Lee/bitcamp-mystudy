@@ -1,5 +1,6 @@
 package bitcamp.myapp.controller;
 
+import bitcamp.myapp.annotation.Controller;
 import bitcamp.myapp.annotation.RequestMapping;
 import bitcamp.myapp.annotation.RequestParam;
 import bitcamp.myapp.service.BoardService;
@@ -8,11 +9,8 @@ import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -32,7 +30,9 @@ import java.util.*;
  * 24. 9. 11.        narilee       BoardService 적용
  * 24. 9. 12.        narilee       DispatcherServlet 적용
  * 24. 9. 19.        narilee       HttpServletResponse 삭제, Param 변경
+ * 24. 9. 23.        narilee       @Controller 적용
  */
+@Controller
 public class BoardController {
 
   private BoardService boardService;

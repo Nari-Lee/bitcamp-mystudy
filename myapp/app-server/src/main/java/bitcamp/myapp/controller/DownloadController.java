@@ -1,11 +1,13 @@
 package bitcamp.myapp.controller;
 
+import bitcamp.myapp.annotation.Controller;
 import bitcamp.myapp.annotation.RequestMapping;
 import bitcamp.myapp.annotation.RequestParam;
 import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.User;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -31,7 +33,9 @@ import java.util.Map;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 9. 9.        narilee       최초 생성
+ * 24. 9. 23.        narilee       @Controller 적용
  */
+@Controller
 public class DownloadController {
 
   private BoardService boardService;

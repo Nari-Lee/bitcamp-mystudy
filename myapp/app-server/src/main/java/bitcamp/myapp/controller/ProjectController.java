@@ -1,11 +1,13 @@
 package bitcamp.myapp.controller;
 
+import bitcamp.myapp.annotation.Controller;
 import bitcamp.myapp.annotation.RequestMapping;
 import bitcamp.myapp.annotation.RequestParam;
 import bitcamp.myapp.service.ProjectService;
 import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.Project;
 import bitcamp.myapp.vo.User;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,7 +34,9 @@ import java.util.Map;
  * 24. 9. 11.        narilee       projectService 적용
  * 24. 9. 12.        narilee       DispatcherServlet 적용
  * 24. 9. 19.        narilee       HttpServletResponse 삭제, Param 변경
+ * 24. 9. 23.        narilee       @Controller 적용
  */
+@Controller
 public class ProjectController {
 
   /** Project 엔티티에 대한 데이터 액세스 객체입니다. */
