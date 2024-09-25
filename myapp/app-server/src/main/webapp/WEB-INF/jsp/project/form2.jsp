@@ -5,14 +5,14 @@
         pageEncoding="UTF-8"
         trimDirectiveWhitespaces="true"%>
 
-<jsp:include page="/header.jsp"/>
+<jsp:include page="../header.jsp"/>
 
 <h1>프로젝트 등록 - 팀원</h1>
 <form action='form3' method="post">
     팀원:<br>
     <ul>
         <c:forEach items="${users}" var="user">
-            <li><input name='member' value='${user.no}' type='checkbox'> ${user.name}</li>
+            <li><input name='memberNos' value='${user.no}' type='checkbox'> ${user.name}</li>
         </c:forEach>
     </ul>
     <button>다음</button>

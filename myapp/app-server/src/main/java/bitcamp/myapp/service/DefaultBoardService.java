@@ -4,6 +4,7 @@ import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -17,7 +18,9 @@ import java.util.List;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 9. 11.        narilee       최초 생성
+ * 24. 9. 24.        narilee       @Component 적용
  */
+@Component
 public class DefaultBoardService implements BoardService {
   private BoardDao boardDao;
   private SqlSessionFactory sqlSessionFactory;

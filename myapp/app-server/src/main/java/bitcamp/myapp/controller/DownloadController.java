@@ -1,24 +1,17 @@
 package bitcamp.myapp.controller;
 
-import bitcamp.myapp.annotation.Controller;
-import bitcamp.myapp.annotation.RequestMapping;
-import bitcamp.myapp.annotation.RequestParam;
-import bitcamp.myapp.dao.BoardDao;
 import bitcamp.myapp.service.BoardService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.User;
-import org.checkerframework.checker.units.qual.C;
+import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +27,7 @@ import java.util.Map;
  * -----------------------------------------------------------
  * 24. 9. 9.        narilee       최초 생성
  * 24. 9. 23.        narilee       @Controller 적용
+ * 24. 9. 25.        narilee       Spring 도입
  */
 @Controller
 public class DownloadController {
@@ -48,14 +42,16 @@ public class DownloadController {
     this.downloadPathMap.put("project", ctx.getRealPath("/upload/project"));
   }
 
-  @RequestMapping("/download")
-  public void download(@RequestParam("path") String path,
-      @RequestParam("fileNo") int fileNo,
+  @GetMapping("/download")
+  public HttpHeaders download(
+      String path,
+      int fileNo,
       HttpSession session,
-      HttpServletResponse res) throws Exception {
+      OutputStream out) throws Exception {
+
+    HttpHeaders headers = new HttpHeaders();
 
     User loginUser = (User) session.getAttribute("loginUser");
-
     if (loginUser == null) {
       throw new Exception("로그인 하지 않았습니다.");
     }
@@ -65,14 +61,11 @@ public class DownloadController {
     if (path.equals("board")) {
       AttachedFile attachedFile = boardService.getAttachedFile(fileNo);
 
-      res.setHeader(
-          "Content-Disposition",
-          String.format("attachment; filename=\"%s\"", attachedFile.getOriginFilename())
-      );
+      headers.add("Content-Disposition",
+          String.format("attachment; filename=\"%s\"", attachedFile.getOriginFilename()));
 
       BufferedInputStream downloadFileIn = new BufferedInputStream(
           new FileInputStream(downloadDir + "/" + attachedFile.getFilename()));
-      OutputStream out = res.getOutputStream();
 
       int b;
       while ((b = downloadFileIn.read()) != -1) {
@@ -87,6 +80,7 @@ public class DownloadController {
     } else {
 
     }
-  }
 
+    return headers;
+  }
 }

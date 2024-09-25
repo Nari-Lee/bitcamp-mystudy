@@ -1,13 +1,12 @@
 package bitcamp.myapp.controller;
 
-import bitcamp.myapp.annotation.Controller;
-import bitcamp.myapp.annotation.RequestMapping;
-import bitcamp.myapp.annotation.RequestParam;
 import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * packageName    : bitcamp.myapp.controller
@@ -27,6 +26,7 @@ import java.util.Map;
  * 24. 9. 13.        narilee       Servlet을 Controller로 전환후 통합
  * 24. 9. 19.        narilee       HttpServletResponse 삭제, Param 변경
  * 24. 9. 23.        narilee       @Controller 적용
+ * 24. 9. 25.        narilee       Spring 도입
  */
 @Controller
 public class UserController {
@@ -37,32 +37,32 @@ public class UserController {
     this.userService = userService;
   }
 
-  @RequestMapping("/user/form")
-  public String form() throws Exception {
-    return "user/form.jsp";
+  @GetMapping("/user/form")
+  public String form() {
+    return "user/form";
   }
 
-  @RequestMapping("/user/add")
+  @PostMapping("/user/add")
   public String add(User user) throws Exception {
     userService.add(user);
     return "redirect:list";
   }
 
-  @RequestMapping("/user/list")
-  public String list(Map<String, Object> map) throws Exception {
+  @GetMapping("/user/list")
+  public String list(Model model) throws Exception {
     List<User> list = userService.list();
-    map.put("list", list);
-    return "/user/list.jsp";
+    model.addAttribute("list", list);
+    return "user/list";
   }
 
-  @RequestMapping("/user/view")
-  public String view(@RequestParam("no") int no, Map<String, Object> map) throws Exception {
+  @GetMapping("/user/view")
+  public String view(int no, Model model) throws Exception {
     User user = userService.get(no);
-    map.put("user", user);
-    return "/user/view.jsp";
+    model.addAttribute("user", user);
+    return "user/view";
   }
 
-  @RequestMapping("/user/update")
+  @PostMapping("/user/update")
   public String update(User user) throws Exception {
     if (userService.update(user)) {
       return "redirect:list";
@@ -71,8 +71,8 @@ public class UserController {
     }
   }
 
-  @RequestMapping("/user/delete")
-  public String delete(@RequestParam("no") int no) throws Exception {
+  @GetMapping("/user/delete")
+  public String delete(int no) throws Exception {
     if (userService.delete(no)) {
       return "redirect:list";
     } else {

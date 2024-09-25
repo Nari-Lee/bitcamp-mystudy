@@ -8,7 +8,7 @@
 <%@ page import="bitcamp.myapp.vo.Board"%>
 <%@ page import="bitcamp.myapp.vo.AttachedFile"%>
 
-<jsp:include page="/header.jsp"/>
+<jsp:include page="../header.jsp"/>
 
 <h1>게시글 조회</h1>
 

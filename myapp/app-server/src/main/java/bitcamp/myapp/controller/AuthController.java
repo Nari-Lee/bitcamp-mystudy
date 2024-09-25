@@ -1,15 +1,12 @@
 package bitcamp.myapp.controller;
 
-import bitcamp.myapp.annotation.Controller;
-import bitcamp.myapp.annotation.RequestMapping;
-import bitcamp.myapp.annotation.RequestParam;
 import bitcamp.myapp.service.UserService;
 import bitcamp.myapp.vo.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import java.io.IOException;
 
 /**
  * packageName    : bitcamp.myapp.servlet.auth
@@ -28,6 +25,7 @@ import java.io.IOException;
  * 24. 9. 13.        narilee       Servlet을 Controller로 전환후 통합
  * 24. 9. 19.        narilee       HttpServletResponse 삭제, Param 변경
  * 24. 9. 23.        narilee       @Controller 적용
+ * 24. 9. 25.        narilee       Spring 도입
  */
 @Controller
 public class AuthController {
@@ -39,24 +37,23 @@ public class AuthController {
     this.userService = userService;
   }
 
-  @RequestMapping("/auth/form")
-  public String form() throws Exception {
-    return "auth/form.jsp";
+  @GetMapping("/auth/form")
+  public void form() {
   }
 
-  @RequestMapping("/auth/login")
+  @PostMapping("/auth/login")
   public String login(
-      @RequestParam("email") String email,
-      @RequestParam("password") String password,
-      @RequestParam("saveEmail") boolean saveEmail,
+      String email,
+      String password,
+      boolean saveEmail,
       HttpServletResponse res,
       HttpSession session
   ) throws Exception {
 
     User user = userService.exists(email, password);
     if (user == null) {
-      res.setHeader("Refresh", "2; url=login");
-      return "/auth/fail.jsp";
+      res.setHeader("Refresh", "2; url=form");
+      return "auth/fail";
     }
 
     if (saveEmail) {
@@ -74,8 +71,8 @@ public class AuthController {
   }
 
 
-  @RequestMapping("/auth/logout")
-  public String logout(HttpSession session) throws Exception {
+  @GetMapping("/auth/logout")
+  public String logout(HttpSession session) {
     session.invalidate();
     return "redirect:/";
   }

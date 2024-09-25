@@ -3,6 +3,7 @@ package bitcamp.myapp.service;
 import bitcamp.myapp.dao.UserDao;
 import bitcamp.myapp.vo.User;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -16,7 +17,9 @@ import java.util.List;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 24. 9. 11.        narilee       최초 생성
+ * 24. 9. 24.        narilee       @Component 적용
  */
+@Component
 public class DefaultUserService implements UserService {
   private UserDao userDao;
   private SqlSessionFactory sqlSessionFactory;
