@@ -93,7 +93,7 @@ public class ProjectController {
     List<Project> list = projectService.list();
 
     ModelAndView mv = new ModelAndView();
-    mv.addObject("projects", list);
+    mv.addObject("list", list);
     mv.setViewName("project/list");
     return mv;
   }
@@ -101,10 +101,12 @@ public class ProjectController {
   @GetMapping("/project/view")
   public ModelAndView view(int no) throws Exception {
     ModelAndView mv = new ModelAndView();
-    Project project = projectService.get(no);
-    List<User> users = userService.list();
 
+    Project project = projectService.get(no);
     mv.addObject("project", project);
+
+    List<User> users = userService.list();
+    mv.addObject("users", users);
     mv.setViewName("project/view");
     return mv;
   }
