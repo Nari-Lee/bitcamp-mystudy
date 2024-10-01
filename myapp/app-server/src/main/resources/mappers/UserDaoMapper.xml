@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="UserDao">
+<mapper namespace="bitcamp.myapp.dao.UserDao">
 
     <resultMap id="UserMap" type="user">
         <id column="user_id" property="no"/>
@@ -10,13 +10,15 @@
         <result column="email" property="email"/>
         <result column="pwd" property="password"/>
         <result column="tel" property="tel"/>
+        <result column="photo" property="photo"/>
     </resultMap>
 
     <select id="list" resultMap="UserMap">
         select
             user_id,
             name,
-            email
+            email,
+            photo
         from
             myapp_users
         order by
@@ -24,8 +26,8 @@
     </select>
 
     <insert id="insert" parameterType="user">
-        insert into myapp_users(name, email, pwd, tel)
-        values (#{name}, #{email}, sha1(#{password}), #{tel})
+        insert into myapp_users(name, email, pwd, tel, photo)
+        values (#{name}, #{email}, sha1(#{password}), #{tel}, #{photo})
     </insert>
 
     <select id="findBy" resultMap="UserMap" parameterType="int">
@@ -33,14 +35,15 @@
             user_id,
             name,
             email,
-            tel
+            tel,
+            photo
         from
             myapp_users
         where
             user_id=#{no}
     </select>
 
-    <select id="findByEmailAndPassword" resultMap="UserMap" parameterType="map">
+    <select id="findByEmailAndPassword" resultMap="UserMap">
         select
             user_id,
             name,
@@ -58,6 +61,7 @@
             email=#{email},
             pwd=sha1(#{password}),
             tel=#{tel}
+            photo=#{photo}
         where
             user_id=#{no}
     </update>

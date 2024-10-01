@@ -1,6 +1,7 @@
 package bitcamp.myapp.controller;
 
 import bitcamp.myapp.service.BoardService;
+import bitcamp.myapp.service.StorageService;
 import bitcamp.myapp.vo.AttachedFile;
 import bitcamp.myapp.vo.Board;
 import bitcamp.myapp.vo.User;
@@ -9,11 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.*;
-import java.io.File;
 import java.util.*;
 
 /**
@@ -21,11 +19,9 @@ import java.util.*;
  * fileName       : BoardAddServlet
  * author         : narilee
  * date           : 24. 8. 28.
- * description    : 게시글 등록을 처리하는 서블릿 클래스입니다.
- *                  이 서블릿은 사용자가 입력한 게시글 정보를 받아 데이터베이스에 저장하고,
- *                  처리 결과를 HTML 형식으로 응답합니다.
+ * description    : 게시글 등록을 처리하는 서블릿 클래스입니다. 이 서블릿은 사용자가 입력한 게시글 정보를 받아 데이터베이스에 저장하고, 처리 결과를 HTML 형식으로 응답합니다.
  * ===========================================================
- * DATE              AUTHOR             NOTE
+ * DATE              AUTHOR         NOTE
  * -----------------------------------------------------------
  * 24. 8. 28.        narilee       최초 생성
  * 24. 9. 05.        narilee       HttpServlet으로 변경
@@ -35,16 +31,21 @@ import java.util.*;
  * 24. 9. 19.        narilee       HttpServletResponse 삭제, Param 변경
  * 24. 9. 23.        narilee       @Controller 적용
  * 24. 9. 25.        narilee       Spring 도입
+ * 24. 9. 27.        narilee       ncloud 도입
  */
 @Controller
 public class BoardController {
 
   private BoardService boardService;
-  private String uploadDir;
+  private StorageService storageService;
 
-  public BoardController(BoardService boardService, ServletContext ctx) {
+  private String folderName = "board/";
+
+  public BoardController(
+      BoardService boardService,
+      StorageService storageService) {
     this.boardService = boardService;
-    this.uploadDir = ctx.getRealPath("/upload/board");
+    this.storageService = storageService;
   }
 
   @GetMapping("/board/form")
@@ -65,6 +66,7 @@ public class BoardController {
     board.setWriter(loginUser);
 
     ArrayList<AttachedFile> attachedFiles = new ArrayList<>();
+
     for (MultipartFile file : files) {
       if (file.getSize() == 0) {
         continue;
@@ -74,7 +76,12 @@ public class BoardController {
       attachedFile.setFilename(UUID.randomUUID().toString());
       attachedFile.setOriginFilename(file.getOriginalFilename());
 
-      file.transferTo(new File(this.uploadDir + "/" + attachedFile.getFilename()));
+      // 첨부 파일을 Object Storage에 올린다.
+      HashMap<String, Object> options = new HashMap<>();
+      options.put(StorageService.CONTENT_TYPE, file.getContentType());
+      storageService.upload(folderName + attachedFile.getFilename(),
+          file.getInputStream(),
+          options);
 
       attachedFiles.add(attachedFile);
     }
@@ -134,7 +141,12 @@ public class BoardController {
       attachedFile.setFilename(UUID.randomUUID().toString());
       attachedFile.setOriginFilename(part.getSubmittedFileName());
 
-      part.write(this.uploadDir + "/" + attachedFile.getFilename());
+      // 첨부 파일을 Object Storage에 올린다.
+      HashMap<String, Object> options = new HashMap<>();
+      options.put(StorageService.CONTENT_TYPE, part.getContentType());
+      storageService.upload(folderName + attachedFile.getFilename(),
+          part.getInputStream(),
+          options);
 
       attachedFiles.add(attachedFile);
     }
@@ -146,23 +158,23 @@ public class BoardController {
   }
 
   @GetMapping("/board/delete")
-  public String delete(
-      int no,
-      HttpSession session) throws Exception {
+  public String delete(int no, HttpSession session) throws Exception {
 
     User loginUser = (User) session.getAttribute("loginUser");
     Board board = boardService.get(no);
 
     if (board == null) {
       throw new Exception("없는 게시글입니다.");
-    } else if (loginUser == null || loginUser.getNo() > 10 && board.getWriter().getNo() != loginUser.getNo()) {
+    } else if (loginUser == null || loginUser.getNo() > 10 && board.getWriter()
+        .getNo() != loginUser.getNo()) {
       throw new Exception("삭제 권한이 없습니다.");
     }
 
     for (AttachedFile attachedFile : board.getAttachedFiles()) {
-      File file = new File(uploadDir + "/" + attachedFile.getFilename());
-      if (file.exists()) {
-        file.delete();
+      try {
+        storageService.delete(folderName + attachedFile.getFilename());
+      } catch (Exception e) {
+        System.out.printf("%s 파일 삭제 실패!\n", folderName + attachedFile.getFilename());
       }
     }
 
@@ -171,10 +183,7 @@ public class BoardController {
   }
 
   @GetMapping("/board/file/delete")
-  public String fileDelete(
-      HttpSession session,
-      int fileNo,
-      int boardNo) throws Exception {
+  public String fileDelete(HttpSession session, int fileNo, int boardNo) throws Exception {
 
     User loginUser = (User) session.getAttribute("loginUser");
     if (loginUser == null) {
@@ -191,13 +200,13 @@ public class BoardController {
       throw new Exception("삭제 권한이 없습니다.");
     }
 
-    File file = new File(uploadDir + "/" + attachedFile.getFilename());
-    if (file.exists()) {
-      file.delete();
+    try {
+      storageService.delete(folderName + attachedFile.getFilename());
+    } catch (Exception e) {
+      System.out.printf("%s 파일 삭제 실패!\n", folderName + attachedFile.getFilename());
     }
 
     boardService.deleteAttachedFile(fileNo);
     return "redirect:../view?no=" + boardNo;
   }
-
 }

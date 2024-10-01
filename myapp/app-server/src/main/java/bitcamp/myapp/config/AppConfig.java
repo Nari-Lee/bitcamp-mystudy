@@ -1,22 +1,24 @@
 package bitcamp.myapp.config;
 
-import bitcamp.myapp.dao.BoardDao;
-import bitcamp.myapp.dao.DaoFactory;
-import bitcamp.myapp.dao.ProjectDao;
-import bitcamp.myapp.dao.UserDao;
-import bitcamp.mybatis.SqlSessionFactoryProxy;
-import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import java.io.InputStream;
+import javax.sql.DataSource;
 
 /**
  * packageName    : bitcamp.myapp.config
@@ -33,7 +35,20 @@ import java.io.InputStream;
  */
 @ComponentScan("bitcamp.myapp")
 @EnableWebMvc
+@PropertySource({
+                "classpath:config/jdbc.properties",
+                "file:${user.home}/config/ncp.properties"})
+@EnableTransactionManagement
+@MapperScan("bitcamp.myapp.dao")
 public class AppConfig {
+
+  ApplicationContext appCtx;
+
+  public AppConfig(ApplicationContext appCtx) {
+    this.appCtx = appCtx;
+    //AWS 경고메세지 제거
+    System.getProperties().setProperty("aws.java.v1.disableDeprecationAnnouncements", "true");
+  }
 
   /**
    * JSP 페이지를 위한 뷰 리졸버를 구성합니다.
@@ -52,14 +67,34 @@ public class AppConfig {
   }
 
   /**
-   * 이 메서드는 파일 업로드를 처리하기 위한 MultipartResolver를 설정합니다.
-   * StandardServletMultipartResolver를 사용하여 멀티파트 요청(파일 업로드등)을 처리할 수 있게 합니다.
+   * 이 메서드는 파일 업로드를 처리하기 위한 MultipartResolver를 설정합니다. StandardServletMultipartResolver를 사용하여 멀티파트
+   * 요청(파일 업로드등)을 처리할 수 있게 합니다.
    *
    * @return 멀티파트 요청을 처리하기 위한 StandardServletMultipartResolver
    */
   @Bean
   public MultipartResolver multipartResolver() {
     return new StandardServletMultipartResolver();
+  }
+
+  @Bean
+  public DataSource dataSource(
+      @Value("${jdbc.driver}") String jdbcDriver,
+      @Value("${jdbc.url}") String jdbcUrl,
+      @Value("${jdbc.username}") String jdbcUsername,
+      @Value("${jdbc.password}") String jdbcPassword) {
+
+    DriverManagerDataSource ds = new DriverManagerDataSource();
+    ds.setDriverClassName(jdbcDriver);
+    ds.setUrl(jdbcUrl);
+    ds.setUsername(jdbcUsername);
+    ds.setPassword(jdbcPassword);
+    return ds;
+  }
+
+  @Bean
+  public PlatformTransactionManager transactionManager(DataSource ds) {
+    return new DataSourceTransactionManager(ds);
   }
 
   /**
@@ -69,59 +104,12 @@ public class AppConfig {
    * @throws Exception MyBatis 설정을 로드하는 중 오류가 발생한 경우
    */
   @Bean
-  public SqlSessionFactory sqlSessionFactory() throws Exception {
-    InputStream inputStream = Resources.getResourceAsStream("config/mybatis-config.xml");
-    SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
-    SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(inputStream);
+  public SqlSessionFactory sqlSessionFactory(DataSource ds) throws Exception {
 
-    return new SqlSessionFactoryProxy(sqlSessionFactory);
-  }
-
-  /**
-   * sqlSessionFactory를 사용하여 DaoFactory를 생성합니다.
-   *
-   * @param sqlSessionFactory 사용할 sqlSessionFactory
-   * @return DaoFactory 인스턴스
-   * @throws Exception DaoFactory 생성 중 오류가 발생한 경우
-   */
-  @Bean
-  public DaoFactory daoFactory(SqlSessionFactory sqlSessionFactory) throws Exception {
-    return new DaoFactory(sqlSessionFactory);
-  }
-
-  /**
-   * DaoFactory를 사용하여 UserDao를 생성합니다.
-   *
-   * @param daoFactory UserDao 생성에 필요한 DaoFactory
-   * @return UserDao 인스턴스
-   * @throws Exception UserDao 생성 중 오류가 발생한 경우
-   */
-  @Bean
-  public UserDao userDao(DaoFactory daoFactory) throws Exception {
-    return daoFactory.createObject(UserDao.class);
-  }
-
-  /**
-   * DaoFactory를 사용하여 BoardDao를 생성합니다.
-   *
-   * @param daoFactory BoardDao 생성에 필요한 DaoFactory
-   * @return BoardDao 인스턴스
-   * @throws Exception Board 생성 중 오류가 발생한 경우
-   */
-  @Bean
-  public BoardDao boardDao(DaoFactory daoFactory) throws Exception {
-    return daoFactory.createObject(BoardDao.class);
-  }
-
-  /**
-   * DaoFactory를 사용하여 ProjectDao를 생성합니다.
-   *
-   * @param daoFactory ProjectDao 생성에 필요한 DaoFactory
-   * @return ProjectDao 인스턴스
-   * @throws Exception ProjectDao 생성 중 오류가 발생한 경우
-   */
-  @Bean
-  public ProjectDao projectDao(DaoFactory daoFactory) throws Exception {
-    return daoFactory.createObject(ProjectDao.class);
+    SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+    factoryBean.setDataSource(ds);
+    factoryBean.setTypeAliasesPackage("bitcamp.myapp.vo");
+    factoryBean.setMapperLocations(appCtx.getResources("classpath:mappers/*Mapper.xml"));
+    return factoryBean.getObject();
   }
 }
