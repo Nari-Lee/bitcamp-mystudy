@@ -18,7 +18,7 @@
                 <entry key="auto" value="true"/>
                 <entry key="spareTire">
                     <!-- 객체를 바로 만들어 넣고 싶다면 bean 태그를 사용하라! -->
-                    <bean class="com.eomcs.spring.ioc.ex05.c.Tire" p:maker="비트타이"/>
+                    <bean class="com.eomcs.spring.ioc.ex05.c.Tire" p:maker="비트타이어"/>
                 </entry>
                 <entry key="engine" value-ref="e1"/>
             </map>
