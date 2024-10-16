@@ -34,6 +34,7 @@ import java.util.UUID;
  * 24. 9. 25.        narilee       Spring 도입
  * 24. 9. 30.        narilee       Spring 도입
  */
+@RequestMapping("/user")
 @Controller
 public class UserController {
 
@@ -47,12 +48,12 @@ public class UserController {
     this.storageService = storageService;
   }
 
-  @GetMapping("/user/form")
+  @GetMapping("form")
   public String form() {
     return "user/form";
   }
 
-  @PostMapping("/user/add")
+  @PostMapping("add")
   public String add(User user, MultipartFile file) throws Exception {
 
     // 클라이언트가 보낸 파일을 저장할 때 다른 파일 이름과 충돌나지 않도록 임의의 새 파일 이름을 생성한다.
@@ -70,21 +71,21 @@ public class UserController {
     return "redirect:list";
   }
 
-  @GetMapping("/user/list")
+  @GetMapping("list")
   public String list(Model model) throws Exception {
     List<User> list = userService.list();
     model.addAttribute("list", list);
     return "user/list";
   }
 
-  @GetMapping("/user/view")
+  @GetMapping("view")
   public String view(int no, Model model) throws Exception {
     User user = userService.get(no);
     model.addAttribute("user", user);
     return "user/view";
   }
 
-  @PostMapping("/user/update")
+  @PostMapping("update")
   public String update(User user, MultipartFile file) throws Exception {
 
     User old = userService.get(user.getNo());
@@ -113,7 +114,7 @@ public class UserController {
   }
 
   @Transactional
-  @GetMapping("/user/delete")
+  @GetMapping("delete")
   public String delete(int no) throws Exception {
 
     User old = userService.get(no);

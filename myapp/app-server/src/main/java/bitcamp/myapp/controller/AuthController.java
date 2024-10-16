@@ -5,6 +5,7 @@ import bitcamp.myapp.vo.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.*;
 
@@ -26,7 +27,9 @@ import javax.servlet.http.*;
  * 24. 9. 19.        narilee       HttpServletResponse 삭제, Param 변경
  * 24. 9. 23.        narilee       @Controller 적용
  * 24. 9. 25.        narilee       Spring 도입
+ * 24. 10. 14.        narilee
  */
+@RequestMapping("/auth")
 @Controller
 public class AuthController {
 
@@ -37,11 +40,11 @@ public class AuthController {
     this.userService = userService;
   }
 
-  @GetMapping("/auth/form")
+  @GetMapping("form")
   public void form() {
   }
 
-  @PostMapping("/auth/login")
+  @PostMapping("login")
   public String login(
       String email,
       String password,
@@ -71,7 +74,7 @@ public class AuthController {
   }
 
 
-  @GetMapping("/auth/logout")
+  @GetMapping("logout")
   public String logout(HttpSession session) {
     session.invalidate();
     return "redirect:/";

@@ -1,24 +1,12 @@
 package bitcamp.myapp.config;
 
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-
-import javax.sql.DataSource;
 
 /**
  * packageName    : bitcamp.myapp.config
@@ -33,22 +21,9 @@ import javax.sql.DataSource;
  * 24. 9. 24.        narilee       Service 제거
  * 24. 9. 25.        narilee       Spring 도입
  */
-@ComponentScan("bitcamp.myapp")
+@ComponentScan("bitcamp.myapp.controller")
 @EnableWebMvc
-@PropertySource({
-                "classpath:config/jdbc.properties",
-                "file:${user.home}/config/ncp.properties"})
-@EnableTransactionManagement
-@MapperScan("bitcamp.myapp.dao")
 public class AppConfig {
-
-  ApplicationContext appCtx;
-
-  public AppConfig(ApplicationContext appCtx) {
-    this.appCtx = appCtx;
-    //AWS 경고메세지 제거
-    System.getProperties().setProperty("aws.java.v1.disableDeprecationAnnouncements", "true");
-  }
 
   /**
    * JSP 페이지를 위한 뷰 리졸버를 구성합니다.
@@ -75,41 +50,5 @@ public class AppConfig {
   @Bean
   public MultipartResolver multipartResolver() {
     return new StandardServletMultipartResolver();
-  }
-
-  @Bean
-  public DataSource dataSource(
-      @Value("${jdbc.driver}") String jdbcDriver,
-      @Value("${jdbc.url}") String jdbcUrl,
-      @Value("${jdbc.username}") String jdbcUsername,
-      @Value("${jdbc.password}") String jdbcPassword) {
-
-    DriverManagerDataSource ds = new DriverManagerDataSource();
-    ds.setDriverClassName(jdbcDriver);
-    ds.setUrl(jdbcUrl);
-    ds.setUsername(jdbcUsername);
-    ds.setPassword(jdbcPassword);
-    return ds;
-  }
-
-  @Bean
-  public PlatformTransactionManager transactionManager(DataSource ds) {
-    return new DataSourceTransactionManager(ds);
-  }
-
-  /**
-   * MyBatis를 위한 SqlSessionFactory를 구성합니다.
-   *
-   * @return 구성된 SqlSessionFactoryProxy 를 감싸는 SqlSessionFactoryProxy
-   * @throws Exception MyBatis 설정을 로드하는 중 오류가 발생한 경우
-   */
-  @Bean
-  public SqlSessionFactory sqlSessionFactory(DataSource ds) throws Exception {
-
-    SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-    factoryBean.setDataSource(ds);
-    factoryBean.setTypeAliasesPackage("bitcamp.myapp.vo");
-    factoryBean.setMapperLocations(appCtx.getResources("classpath:mappers/*Mapper.xml"));
-    return factoryBean.getObject();
   }
 }
