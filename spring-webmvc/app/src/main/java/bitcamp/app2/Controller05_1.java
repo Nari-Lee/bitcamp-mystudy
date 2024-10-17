@@ -54,6 +54,8 @@ public class Controller05_1 {
   @ResponseBody
   public String handler2() {
     return new Gson().toJson(this.list);
+    //    return new ObjectMapper().writeValueAsString(this.list);
+
   }
 
 
