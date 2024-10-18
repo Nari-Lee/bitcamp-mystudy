@@ -14,19 +14,36 @@
 </c:if>
 
 <c:if test="${not empty user}">
-  <form action='update' method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data">
     <a href="https://kr.object.ncloudstorage.com/bitcamp-bucket-101/user/${user.photo == null ? 'default.png' : user.photo}">
     <img src="https://kpkjjj1p4932.edge.naverncp.com/Gxif5P9P3w/user/${user.photo == null ? 'default.png' : user.photo}?type=f&w=100&h=100&align=4">
     </a><input name="file" type="file"><br>
-    번호: <input name='no' readonly type='text' value='${user.no}'><br>
+    번호: <input readonly type='text' value='${user.no}'><br>
     이름: <input name='name' type='text' value='${user.name}'><br>
     이메일: <input name='email' type='email' value='${user.email}'><br>
     암호: <input name='password' type='password'><br>
     연락처: <input name='tel' type='tel' value='${user.tel}'><br>
     <button>변경</button>
-    <button type='button' onclick='location.href="delete?no=${user.no}"'>삭제</button>
+    <button type='button' onclick='deleteUser(${user.no})'>삭제</button>
   </form>
 </c:if>
 
+<script>
+  function deleteUser(no) {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("DELETE", location.href, true);
+
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        location.href = "../users";
+      } else {
+        window.alert("삭제 실패입니다!")
+      }
+    };
+
+    xhr.send();
+  }
+</script>
 </body>
 </html>

@@ -33,8 +33,9 @@ import java.util.UUID;
  * 24. 9. 23.        narilee       @Controller 적용
  * 24. 9. 25.        narilee       Spring 도입
  * 24. 9. 30.        narilee       Spring 도입
+ * 24. 10. 17.       narilee       users 기본 url로 변경
  */
-@RequestMapping("/user")
+@RequestMapping("/users")
 @Controller
 public class UserController {
 
@@ -68,25 +69,32 @@ public class UserController {
     user.setPhoto(filename); // DB에 저장할 사진 파일 이름 설정
 
     userService.add(user);
-    return "redirect:list";
+    return "redirect:../users";
   }
 
-  @GetMapping("list")
+  @GetMapping
   public String list(Model model) throws Exception {
     List<User> list = userService.list();
     model.addAttribute("list", list);
     return "user/list";
   }
 
-  @GetMapping("view")
-  public String view(int no, Model model) throws Exception {
+  @GetMapping("{no}")
+  public String view(
+      @PathVariable int no,
+      Model model) throws Exception {
     User user = userService.get(no);
     model.addAttribute("user", user);
     return "user/view";
   }
 
-  @PostMapping("update")
-  public String update(User user, MultipartFile file) throws Exception {
+  @PostMapping("{no}")
+  public String update(
+      @PathVariable int no,
+      User user,
+      MultipartFile file) throws Exception {
+
+    user.setNo(no);
 
     User old = userService.get(user.getNo());
 
@@ -107,23 +115,24 @@ public class UserController {
     }
 
     if (userService.update(user)) {
-      return "redirect:list";
+      return "redirect:../users";
     } else {
       throw new Exception("없는 회원입니다!");
     }
   }
 
   @Transactional
-  @GetMapping("delete")
-  public String delete(int no) throws Exception {
+  @DeleteMapping("{no}")
+  @ResponseBody
+  public String delete(@PathVariable int no) throws Exception {
 
     User old = userService.get(no);
 
     if (userService.delete(no)) {
       storageService.delete(folderName + old.getPhoto());
-      return "redirect:list";
+      return "success";
     } else {
-      throw new Exception("없는 회원입니다.");
+      return "fail";
     }
   }
 }
